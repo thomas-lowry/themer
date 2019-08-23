@@ -1,7 +1,7 @@
 # themer
 A Figma plugin designed to allow you to swap between styles named the same from different published libraries.
 
-###How to use:
+### How to use:
 
 1. During the first launch, you will be asked for an API URL + Key, you can create a free bin at www.jsonbin.io. You must also generate a private key in your account profile.
 
@@ -15,5 +15,5 @@ A Figma plugin designed to allow you to swap between styles named the same from 
 
 6. Apply a theme to your design and Themer will swap out whatever styles you have selected.
 
-###Video walkthrough
+### Video walkthrough
 https://www.youtube.com/watch?v=y4uOvGfLoiM
