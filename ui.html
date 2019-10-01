@@ -536,7 +536,7 @@ var latestAPIData = [];
 //PLUGIN EVENTS //////////
 window.onmessage = async (event) => {
 
-	//initalize
+	//initialize
 	//get client storage data and pre-populate fields
 	if (event.data.pluginMessage.type == 'apiCredentials') {
 
@@ -831,7 +831,7 @@ saveCredentials.addEventListener('click', function() {
 	let apiKey = inputApiSecret.value;
 
 	if (apiURL == undefined ||  apiURL == '' || apiKey == undefined || apiKey == '') {
-		showVisualBell('error', false, 'Please verify api fredentials', true);
+		showVisualBell('error', false, 'Please verify api credentials', true);
 	} else {
 		initializeWithData();
 	}
