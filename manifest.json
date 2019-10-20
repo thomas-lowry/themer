@@ -1,7 +1,7 @@
 {
   "name": "Themer",
   "id": "731176732337510831",
-  "api": "0.6.0",
+  "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html"
 }
