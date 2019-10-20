@@ -164,14 +164,6 @@ function getLocalStyles(type) {
 
 // get theme name
 
-function publishedStyleCheck(style) {
-    if (style.key) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
 
 function themeName(name) {
     if (usePrefixes) {
