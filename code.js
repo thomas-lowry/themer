@@ -275,7 +275,7 @@ function getLocalStyles(type) {
         if (colorStyles) {
             colorStyles.forEach(function (color) {
                 var style = {
-                    'name': color.name,
+                    'name': styleName(color.name),
                     'key': color.key,
                     'theme': themeName(color.name),
                     'type': 'PAINT'
@@ -298,7 +298,7 @@ function getLocalStyles(type) {
         if (textStyles) {
             textStyles.forEach(function (text) {
                 var style = {
-                    'name': text.name,
+                    'name': styleName(text.name),
                     'key': text.key,
                     'theme': themeName(text.name),
                     'type': 'TEXT'
@@ -321,7 +321,7 @@ function getLocalStyles(type) {
         if (effectStyles) {
             effectStyles.forEach(function (effect) {
                 var style = {
-                    'name': effect.name,
+                    'name': styleName(effect.name),
                     'key': effect.key,
                     'theme': themeName(effect.name),
                     'type': 'EFFECT'
@@ -356,7 +356,7 @@ function collectColorStyles(node) {
             // key will only be available for remote styles
             if (objectStyle.key) {
                 var style = {
-                    'name': objectStyle.name,
+                    'name': styleName(objectStyle.name),
                     'key': objectStyle.key,
                     'theme': themeName(objectStyle.name),
                     'type': 'PAINT'
@@ -377,7 +377,7 @@ function collectColorStyles(node) {
             // key will only be available for remote styles
             if (objectStyle.key) {
                 var style = {
-                    'name': objectStyle.name,
+                    'name': styleName(objectStyle.name),
                     'key': objectStyle.key,
                     'theme': themeName(objectStyle.name),
                     'type': 'PAINT'
@@ -396,7 +396,7 @@ function collectColorStyles(node) {
             // key will only be available for remote styles
             if (objectStyle.key) {
                 var style = {
-                    'name': objectStyle.name,
+                    'name': styleName(objectStyle.name),
                     'key': objectStyle.key,
                     'theme': themeName(objectStyle.name),
                     'type': 'PAINT'
@@ -426,7 +426,7 @@ function collectTextStyles(node) {
         // key will only be available for remote styles
         if (objectStyle.key) {
             var style = {
-                'name': objectStyle.name,
+                'name': styleName(objectStyle.name),
                 'key': objectStyle.key,
                 'theme': themeName(objectStyle.name),
                 'type': 'TEXT'
@@ -453,7 +453,7 @@ function collectEffectStyles(node) {
         // key will only be available for remote styles
         if (objectStyle.key) {
             var style = {
-                'name': objectStyle.name,
+                'name': styleName(objectStyle.name),
                 'key': objectStyle.key,
                 'theme': themeName(objectStyle.name),
                 'type': 'TEXT'
@@ -495,6 +495,20 @@ function themeName(name) {
     }
     else {
         return newThemeName;
+    }
+}
+function styleName(name) {
+    if (usePrefixes) {
+        if (name.includes('/')) {
+            var styleName_1 = name.split('/').slice(1).join('.');
+            return styleName_1;
+        }
+        else {
+            figma.notify('Styles names must be prefixed. Ex: themeName/colorName');
+        }
+    }
+    else {
+        return name;
     }
 }
 // count number of themes being added
@@ -768,9 +782,7 @@ function findMatchInSelectedTheme(styleKey) {
         //we need the name of the current style so we can search the jsonbin array
         //for matches with the selected theme
         var name_1 = currentStyle.name;
-        console.log('selected theme', selectedTheme);
         var matchedStyle = jsonBinData.find(function (style) { return style.name === name_1 && style.theme === selectedTheme; });
-        console.log(matchedStyle);
         if (matchedStyle) {
             //if we find a match in the selected theme, we will return the style key
             // so that we can import the style into the doc

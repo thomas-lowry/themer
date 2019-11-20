@@ -230,7 +230,7 @@ function getLocalStyles(type) {
         if (colorStyles) {
             colorStyles.forEach(color => {
                 let style = {
-                    'name': color.name,
+                    'name': styleName(color.name),
                     'key': color.key,
                     'theme': themeName(color.name),
                     'type': 'PAINT'
@@ -250,7 +250,7 @@ function getLocalStyles(type) {
         if (textStyles) {
             textStyles.forEach(text => {
                 let style = {
-                    'name': text.name,
+                    'name': styleName(text.name),
                     'key': text.key,
                     'theme': themeName(text.name),
                     'type': 'TEXT'
@@ -270,7 +270,7 @@ function getLocalStyles(type) {
         if (effectStyles) {
             effectStyles.forEach(effect => {
                 let style = {
-                    'name': effect.name,
+                    'name': styleName(effect.name),
                     'key': effect.key,
                     'theme': themeName(effect.name),
                     'type': 'EFFECT'
@@ -306,7 +306,7 @@ function collectColorStyles(node) {
             // key will only be available for remote styles
             if (objectStyle.key) {
                 let style = {
-                    'name': objectStyle.name,
+                    'name': styleName(objectStyle.name),
                     'key': objectStyle.key,
                     'theme': themeName(objectStyle.name),
                     'type': 'PAINT'
@@ -326,7 +326,7 @@ function collectColorStyles(node) {
             // key will only be available for remote styles
             if (objectStyle.key) {
                 let style = {
-                    'name': objectStyle.name,
+                    'name': styleName(objectStyle.name),
                     'key': objectStyle.key,
                     'theme': themeName(objectStyle.name),
                     'type': 'PAINT'
@@ -344,7 +344,7 @@ function collectColorStyles(node) {
             // key will only be available for remote styles
             if (objectStyle.key) {
                 let style = {
-                    'name': objectStyle.name,
+                    'name': styleName(objectStyle.name),
                     'key': objectStyle.key,
                     'theme': themeName(objectStyle.name),
                     'type': 'PAINT'
@@ -375,7 +375,7 @@ function collectTextStyles(node) {
         // key will only be available for remote styles
         if (objectStyle.key) {
             let style = {
-                'name': objectStyle.name,
+                'name': styleName(objectStyle.name),
                 'key': objectStyle.key,
                 'theme': themeName(objectStyle.name),
                 'type': 'TEXT'
@@ -402,7 +402,7 @@ function collectEffectStyles(node) {
         // key will only be available for remote styles
         if (objectStyle.key) {
             let style = {
-                'name': objectStyle.name,
+                'name': styleName(objectStyle.name),
                 'key': objectStyle.key,
                 'theme': themeName(objectStyle.name),
                 'type': 'TEXT'
@@ -442,6 +442,19 @@ function themeName(name) {
         }
     } else {
         return newThemeName;
+    }
+}
+
+function styleName(name) {
+    if (usePrefixes) {
+        if (name.includes('/')) {
+            let styleName = name.split('/').slice(1).join('.'); 
+            return styleName;
+        } else {
+            figma.notify('Styles names must be prefixed. Ex: themeName/colorName');
+        }
+    } else {
+        return name;
     }
 }
 
@@ -685,9 +698,7 @@ function findMatchInSelectedTheme(styleKey) {
         //we need the name of the current style so we can search the jsonbin array
         //for matches with the selected theme
         let name = currentStyle.name;
-        console.log('selected theme', selectedTheme);
         let matchedStyle = jsonBinData.find(style => style.name === name && style.theme === selectedTheme);
-        console.log(matchedStyle);
        
         if (matchedStyle) {
             //if we find a match in the selected theme, we will return the style key
