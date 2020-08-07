@@ -1,9 +1,10 @@
 // VARS
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -490,7 +491,8 @@ function themeName(name) {
             return prefix[0];
         }
         else {
-            figma.notify('Styles names must be prefixed. Ex: themeName/colorName');
+            var notifiyText = 'Could not handle:\'' + name + '\' - Styles names must be prefixed. Ex: themeName/colorName';
+            figma.notify(notifiyText);
         }
     }
     else {
@@ -504,7 +506,8 @@ function styleName(name) {
             return styleName_1;
         }
         else {
-            figma.notify('Styles names must be prefixed. Ex: themeName/colorName');
+            var notifiyText = 'Could not handle:\'' + name + '\' - Styles names must be prefixed. Ex: themeName/colorName';
+            figma.notify(notifiyText);
         }
     }
     else {
@@ -550,7 +553,7 @@ function mergeNewThemesWithExisting() {
 function applyTheme(applyTo) {
     var nodes;
     if (applyTo === 'selection') {
-        if (figma.currentPage.selection) {
+        if (checkFigmaSelection()) {
             nodes = figma.currentPage.selection;
         }
         else {
@@ -838,4 +841,8 @@ function removeDuplicatesBy(keyFn, array) {
             mySet.add(key);
         return isNew;
     });
+}
+// check if there is currently an selection in figma
+function checkFigmaSelection() {
+    return figma.currentPage.selection && figma.currentPage.selection.length > 0;
 }
