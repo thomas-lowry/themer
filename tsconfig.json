@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-      "lib": [ "es2015", "dom" ],
-      "downlevelIteration": true
-    }
+    "target": "es6"
+  },
 }
