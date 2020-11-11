@@ -1,0 +1,11 @@
+# dependency directory
+/node_modules
+
+# potential cache
+.npm
+npm-debug.log*
+
+# OS temp files
+.DS_Store
+
+
