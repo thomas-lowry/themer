@@ -100,7 +100,6 @@ figma.ui.onmessage = async (msg) => {
       break;
 
     case "searchThemes":
-      updatedDataFromAPI(msg.themeData);
       searchThemes(msg.themeData);
       break;
 
@@ -232,14 +231,17 @@ function getLocalStyles(type) {
 
     if (colorStyles) {
       colorStyles.forEach((color) => {
-        let style = {
+        let newStyle = {
           name: styleName(color.name),
           key: color.key,
-          theme: themeName(color.name),
           type: "PAINT",
         };
-        if (style.name && style.key && style.theme && style.type) {
-          collectedStyleData.push(style);
+        newThemeName = themeName(color.name);
+        if (newStyle.name && newStyle.key && newThemeName && newStyle.type) {
+          collectedStyleData.push({
+            theme: newThemeName,
+            style: newStyle,
+          });
         } else {
           figma.notify("Error adding theme");
           throw new Error("Error adding theme");
@@ -252,14 +254,17 @@ function getLocalStyles(type) {
     let textStyles = figma.getLocalTextStyles();
     if (textStyles) {
       textStyles.forEach((text) => {
-        let style = {
+        let newStyle = {
           name: styleName(text.name),
           key: text.key,
-          theme: themeName(text.name),
           type: "TEXT",
         };
-        if (style.name && style.key && style.theme && style.type) {
-          collectedStyleData.push(style);
+        newThemeName = themeName(text.name);
+        if (newStyle.name && newStyle.key && newThemeName && newStyle.type) {
+          collectedStyleData.push({
+            theme: newThemeName,
+            style: newStyle,
+          });
         } else {
           figma.notify("Error adding theme");
           throw new Error("Error adding theme");
@@ -272,14 +277,17 @@ function getLocalStyles(type) {
     let effectStyles = figma.getLocalEffectStyles();
     if (effectStyles) {
       effectStyles.forEach((effect) => {
-        let style = {
+        let newStyle = {
           name: styleName(effect.name),
           key: effect.key,
-          theme: themeName(effect.name),
           type: "EFFECT",
         };
-        if (style.name && style.key && style.theme && style.type) {
-          collectedStyleData.push(style);
+        newThemeName = themeName(effect.name);
+        if (newStyle.name && newStyle.key && newThemeName && newStyle.type) {
+          collectedStyleData.push({
+            theme: newThemeName,
+            style: newStyle,
+          });
         } else {
           figma.notify("Error adding theme");
           throw new Error("Error adding theme");
@@ -307,14 +315,17 @@ function collectColorStyles(node) {
       let objectStyle = figma.getStyleById(node.backgroundStyleId);
       // key will only be available for remote styles
       if (objectStyle.key) {
-        let style = {
+        let newStyle = {
           name: styleName(objectStyle.name),
           key: objectStyle.key,
-          theme: themeName(objectStyle.name),
           type: "PAINT",
         };
-        if (style.name && style.key && style.theme && style.type) {
-          collectedStyleData.push(style);
+        newThemeName = themeName(objectStyle.name);
+        if (newStyle.name && newStyle.key && newThemeName && newStyle.type) {
+          collectedStyleData.push({
+            theme: newThemeName,
+            style: newStyle,
+          });
         } else {
           figma.notify("Error adding theme");
           throw new Error("Error adding theme");
@@ -336,14 +347,17 @@ function collectColorStyles(node) {
       let objectStyle = figma.getStyleById(node.fillStyleId);
       // key will only be available for remote styles
       if (objectStyle.key) {
-        let style = {
+        let newStyle = {
           name: styleName(objectStyle.name),
           key: objectStyle.key,
-          theme: themeName(objectStyle.name),
           type: "PAINT",
         };
-        if (style.name && style.key && style.theme && style.type) {
-          collectedStyleData.push(style);
+        newThemeName = themeName(objectStyle.name);
+        if (newStyle.name && newStyle.key && newThemeName && newStyle.type) {
+          collectedStyleData.push({
+            theme: newThemeName,
+            style: newStyle,
+          });
         } else {
           figma.notify("Error adding theme");
           throw new Error("Error adding theme");
@@ -354,14 +368,17 @@ function collectColorStyles(node) {
       let objectStyle = figma.getStyleById(node.strokeStyleId);
       // key will only be available for remote styles
       if (objectStyle.key) {
-        let style = {
+        let newStyle = {
           name: styleName(objectStyle.name),
           key: objectStyle.key,
-          theme: themeName(objectStyle.name),
           type: "PAINT",
         };
-        if (style.name && style.key && style.theme && style.type) {
-          collectedStyleData.push(style);
+        newThemeName = themeName(objectStyle.name);
+        if (newStyle.name && newStyle.key && newThemeName && newStyle.type) {
+          collectedStyleData.push({
+            theme: newThemeName,
+            style: newStyle,
+          });
         } else {
           figma.notify("Error adding theme");
           return;
@@ -385,14 +402,17 @@ function collectTextStyles(node) {
     let objectStyle = figma.getStyleById(node.textStyleId);
     // key will only be available for remote styles
     if (objectStyle.key) {
-      let style = {
+      let newStyle = {
         name: styleName(objectStyle.name),
         key: objectStyle.key,
-        theme: themeName(objectStyle.name),
         type: "TEXT",
       };
-      if (style.name && style.key && style.theme && style.type) {
-        collectedStyleData.push(style);
+      newThemeName = themeName(objectStyle.name);
+      if (newStyle.name && newStyle.key && newThemeName && newStyle.type) {
+        collectedStyleData.push({
+          theme: newThemeName,
+          style: newStyle,
+        });
       } else {
         figma.notify("Error adding theme");
         throw new Error("Error adding theme");
@@ -415,14 +435,17 @@ function collectEffectStyles(node) {
     let objectStyle = figma.getStyleById(node.effectStyleId);
     // key will only be available for remote styles
     if (objectStyle.key) {
-      let style = {
+      let newStyle = {
         name: styleName(objectStyle.name),
         key: objectStyle.key,
-        theme: themeName(objectStyle.name),
         type: "TEXT",
       };
-      if (style.name && style.key && style.theme && style.type) {
-        collectedStyleData.push(style);
+      newThemeName = themeName(objectStyle.name);
+      if (newStyle.name && newStyle.key && newThemeName && newStyle.type) {
+        collectedStyleData.push({
+          theme: newThemeName,
+          style: newStyle,
+        });
       } else {
         figma.notify("Error adding theme");
         throw new Error("Error adding theme");
@@ -432,15 +455,16 @@ function collectEffectStyles(node) {
 }
 
 function searchThemes(data) {
-  let value = document.getElementById("searchInput").nodeValue;
   jsonBinData = JSON.parse(data);
+  let searchedItem = "temp";
+  // create new list of themes
+  let themes = [...new Set(jsonBinData.map((obj) => obj.theme))];
 
-  for (var i = 0; i < jsonBinData.length; i++) {
-    // look for the entry with a matching `code` value
-    if (jsonBinData[i].theme == value) {
-      console.log("exists");
-    }
-  }
+  // if (themes.has(searchedItem)) {
+  // return theme
+  // } else {
+  // theme not found
+  // }
 }
 
 // data passback to UI for posting to JSON Bin
@@ -485,7 +509,7 @@ function styleName(name) {
 
 // count number of themes being added
 function countNewThemes() {
-  let themes = [...new Set(cleanedStyleData.map((style) => style.theme))];
+  let themes = [...new Set(cleanedStyleData.map((obj) => obj.theme))];
   newThemeCount = themes.length;
 }
 
@@ -501,9 +525,10 @@ function clearStyleData() {
 // with the existing theme data
 function mergeNewThemesWithExisting() {
   cleanedStyleData = removeDuplicatesBy(
-    (style) => style.key,
+    (obj) => obj.style.key,
     collectedStyleData
   );
+
   if (cleanedStyleData) {
     if (existingThemeCount === 0) {
       cleanedStyleData.forEach((style) => {
@@ -544,21 +569,21 @@ function applyTheme(applyTo) {
     let colorStyles = [
       ...new Set(
         jsonBinData.map(
-          (style) => style.theme === selectedTheme && style.type === "PAINT"
+          (obj) => obj.theme === selectedTheme && obj.style.type === "PAINT"
         )
       ),
     ];
     let textStyles = [
       ...new Set(
         jsonBinData.map(
-          (style) => style.theme === selectedTheme && style.type === "TEXT"
+          (obj) => obj.theme === selectedTheme && obj.style.type === "TEXT"
         )
       ),
     ];
     let effectStyles = [
       ...new Set(
         jsonBinData.map(
-          (style) => style.theme === selectedTheme && style.type === "EFFECT"
+          (obj) => obj.theme === selectedTheme && obj.style.type === "EFFECT"
         )
       ),
     ];
@@ -755,7 +780,7 @@ function applyEffect(node) {
 //find matching styles based
 function findMatchInSelectedTheme(styleKey) {
   // this gets item in the array which matches the current style applied
-  let currentStyle = jsonBinData.find((style) => style.key === styleKey);
+  let currentStyle = jsonBinData.find((obj) => obj.style.key === styleKey);
 
   // if we find a matching style execute this
   if (currentStyle) {
@@ -764,7 +789,7 @@ function findMatchInSelectedTheme(styleKey) {
     //for matches with the selected theme
     let name = currentStyle.name;
     let matchedStyle = jsonBinData.find(
-      (style) => style.name === name && style.theme === selectedTheme
+      (obj) => obj.style.name === name && obj.style.theme === selectedTheme
     );
 
     if (matchedStyle) {
@@ -786,7 +811,7 @@ function updatedDataFromAPI(data) {
   // if there is, we will append subsequent themes to the data
   // if its the first theme, we want to overwrite the same content
   // that was required to to create an empty bin
-  // console.log(jsonBinData);
+  console.log(jsonBinData);
 
   if (jsonBinData[0].theme === undefined) {
     existingThemeCount = 0;
@@ -807,13 +832,19 @@ function updateCredentials(secret, url) {
   })();
 }
 
-//remove styles with duplicate keys from themes
+// remove styles with duplicate keys from themes - repopulates tempSet with keys only if it does not already have key
+
+/** ANCHOR ask parker if this makes sense, aka lines 841-842.
+ *  keyfn represent the function (obj) => obj.style.key
+ *
+ *  i think the json issue is solved on line 528
+ */
 function removeDuplicatesBy(keyFn, array) {
-  var mySet = new Set();
+  var tempSet = new Set();
   return array.filter(function (x) {
     var key = keyFn(x),
-      isNew = !mySet.has(key);
-    if (isNew) mySet.add(key);
+      isNew = !tempSet.has(key);
+    if (isNew) tempSet.add(key);
     return isNew;
   });
 }
