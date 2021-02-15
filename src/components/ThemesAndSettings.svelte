@@ -4,14 +4,12 @@
 	import ThemeList from './ThemeList';
 	import Settings from './Settings';
     import TabBar from './TabBar';
-    import { mainSection } from '../scripts/stores.js';
-    import windowWidth from '../scripts/windowSize';
+    import { mainSection, winWidth } from '../scripts/stores.js';
 
     let position = 0;
-    let width = windowWidth();
 
     $: if($mainSection === 'settings') {
-        position = '-' + (1 * width) + 'px';
+        position = '-' + (1 * $winWidth) + 'px';
     } else {
         position = '0px';
     }

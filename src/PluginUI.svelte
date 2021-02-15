@@ -1,8 +1,11 @@
 <script>
 
+	//components
 	import { GlobalCSS } from 'figma-plugin-ds-svelte';
 	import ThemesAndSettings from './components/ThemesAndSettings';
 	import Loading from './components/Loading';
+	import CreateTheme from './components/CreateTheme';
+
 
 </script>
 
@@ -18,7 +21,7 @@
 </div>
 
 <!-- create theme sequence -->
-
+<CreateTheme />
 
 
 <!-- onboarding -->

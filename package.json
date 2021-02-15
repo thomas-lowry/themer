@@ -11,7 +11,7 @@
     "@rollup/plugin-image": "^2.0.5",
     "@rollup/plugin-node-resolve": "^6.1.0",
     "cssnano": "^4.1.10",
-    "figma-plugin-ds-svelte": "^1.0.7",
+    "figma-plugin-ds-svelte": "^1.1.6",
     "rollup": "^1.32.1",
     "rollup-plugin-html-bundle": "0.0.3",
     "rollup-plugin-livereload": "^1.3.0",
@@ -25,6 +25,8 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "sirv-cli": "^0.4.6"
+    "is-obj": "^2.0.0",
+    "sirv-cli": "^0.4.6",
+    "svelte-css-vars": "0.0.1"
   }
 }

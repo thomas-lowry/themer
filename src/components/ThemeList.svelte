@@ -3,12 +3,11 @@
 	//import Global CSS from the svelte boilerplate
     import { GlobalCSS, Button } from 'figma-plugin-ds-svelte';
     import ThemeRow from './ThemeRow';
-    import { themes, mainSection } from '../scripts/stores.js';
-    import windowWidth from '../scripts/windowSize';
+    import { themes, mainSection, winWidth, createThemeUI } from '../scripts/stores.js';
     import EmptyStateIllustation from '../assets/empty-state.svg';
     
     let className = '';
-    let width = windowWidth() + 'px';
+    let width = $winWidth + 'px';
     
     export { className as class };
 
@@ -32,7 +31,7 @@
         <!-- Empty state -->
         <div class="flex column flex-grow align-items-center justify-content-center"> 
             {@html EmptyStateIllustation}
-            <Button on:click={() => mainSection.set('settings')} variant='secondary' class="mt-xsmall mb-small">Create a theme</Button>
+            <Button on:click={() => $createThemeUI = true} variant='secondary' class="mt-xsmall mb-small">Create a theme</Button>
         </div>
 
     {/if}
@@ -53,7 +52,7 @@
 <style>
 
 .container {
-    height: calc(100% - 1px);
+    height: calc(100% - 2px);
 }
 
 .themelist {

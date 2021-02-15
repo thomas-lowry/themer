@@ -1,2 +1,3 @@
 function windowWidth(){ return window.innerWidth }
-export default windowWidth;
+function windowHeight(){ return window.innerHeight }
+export { windowWidth, windowHeight };

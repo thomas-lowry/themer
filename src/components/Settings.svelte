@@ -3,11 +3,11 @@
 	//import Global CSS from the svelte boilerplate
 	//contains Figma color vars, spacing vars, utility classes and more
     import { GlobalCSS, Input, Label, IconKey, IconHyperlink, Button } from 'figma-plugin-ds-svelte';
-    import windowWidth from '../scripts/windowSize';
+    import { winWidth } from '../scripts/stores.js';
     import HeaderGraphic from '../assets/header.svg';
 
     let className = '';
-    let width = windowWidth() + 'px';
+    let width = $winWidth + 'px';
 
     export { className as class };
 
@@ -35,6 +35,11 @@
 
 
 <style>
+
+.header {
+    box-shadow: 0px 1px 0px var(--black1);
+    box-shadow: 0px -1px 0px var(--black1);
+}
 
 .container {
     width: 100%;
