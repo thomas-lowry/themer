@@ -1,39 +1,40 @@
 <script>
 
+    //imports
     import { Button, Icon, IconButton, IconBack, IconTheme, Switch, Radio, Checkbox, Input, Type, Label } from 'figma-plugin-ds-svelte';
     import cssVars from 'svelte-css-vars';
     import { step, styleSource, styleTypeColor, styleTypeText, styleTypeEffect, winWidth, createThemeUI, loading, themes } from '../scripts/stores.js';
     
-    //number of steps in the create theme process
-    let totalSteps = 3;
-    let newThemeName;
-    let validThemeName = false;
-    let errorMessage;
+    let totalSteps = 3; //number of steps in the create theme process, easy to add more later
+    
+    //theme name
+    let newThemeName; //stores name of theme, only use this value if the user does not use foldered/prefixed names
+    let invalidThemeName = false; //this will be true if the name of the theme is invalid (currently only checks for duplicate theme names)
+    let errorMessage; //if there is an error with theme name, this stores the msg to display under the theme name input field
 
-    $: uiLeftPos = ($createThemeUI) ? '0px' : $winWidth + 'px';
-
-    $: styleVars = {
-        stepLabelTop: -Math.abs(($step - 1) * 40) + 'px',
-        stepContainerLeft: -Math.abs(($step - 1) * $winWidth) + 'px',
-        uiLeft: uiLeftPos
-    };
-
-    // check to see if at least one type of style is selected
-    let styleTypeValid;
-    $: $styleTypeColor, validateStyleTypes();
-    $: $styleTypeText, validateStyleTypes();
-    $: $styleTypeEffect, validateStyleTypes();
-
-    function validateStyleTypes() {
-        if ($styleTypeColor === false && $styleTypeText === false && $styleTypeEffect === false) {
-            styleTypeValid = true;
-        } else {
-            styleTypeValid = false;
+    //Validates the name of the theme
+    function themeNameValidate() {
+        if(newThemeName != null) {
+            let match = $themes.find(theme => newThemeName.toLowerCase().trim() === theme.name.toLowerCase().trim());
+            if(match != undefined){
+                invalidThemeName = true;
+                errorMessage = 'Theme name already exists'
+            } else{
+                invalidThemeName = false;
+            }
         }
-        console.log(styleTypeValid);
     }
+    $: newThemeName, themeNameValidate(); //run this function every time the theme name changes 
+    //(with a reactive declaration, we don't need on:input because the variable is bound to the input value)
 
+
+    //ui visible
+    //controls left position of the UI
+    $: uiLeftPos = ($createThemeUI) ? '0px' : $winWidth + 'px';
+    
     //reset the UI
+    //this runs after the create theme flow,
+    //or when the user returns back to the theme list
     function resetCreateThemeUI() {
         $step = 1;
         $styleSource = 'local';
@@ -41,12 +42,39 @@
         $styleTypeText = false;
         $styleTypeEffect = false;
         newThemeName = null;
-        validThemeName = false;
+        invalidThemeName = false;
 
     }
-    $: $createThemeUI, resetCreateThemeUI();
+    $: $createThemeUI, resetCreateThemeUI(); //this var controls visibility of the create theme UI, run the reset when this value changes
 
-    //navigate to a different step
+
+    //a collection of CSS vars that are referenced to control dynamic positioning of elements in the UI
+    $: styleVars = {
+        stepLabelTop: -Math.abs(($step - 1) * 40) + 'px',
+        stepContainerLeft: -Math.abs(($step - 1) * $winWidth) + 'px',
+        uiLeft: uiLeftPos
+    };
+
+
+    //check to see if at least one type of style switch selected
+    //if none are selected, the styleTypeInvalid var will be true
+    let styleTypeInvalid;
+    $: $styleTypeColor, validateStyleTypes();
+    $: $styleTypeText, validateStyleTypes();
+    $: $styleTypeEffect, validateStyleTypes();
+
+    function validateStyleTypes() {
+        if ($styleTypeColor === false && $styleTypeText === false && $styleTypeEffect === false) {
+            styleTypeInvalid = true;
+        } else {
+            styleTypeInvalid = false;
+        }
+    }
+
+
+    //navigate to a different step in the create thee flow
+    //it excepts a numerical value, 1, 2 or 3
+    //it can also accept a string "next" or "prev"
     function gotoToStep(destination) {
        if (typeof(destination) === 'number') {
            $step = destination;
@@ -63,23 +91,9 @@
        }
     }
 
-    //Theme name validation
-    function themeNameValidate() {
-        if(newThemeName != null) {
-            let match = $themes.find(theme => newThemeName.toLowerCase().trim() === theme.name.toLowerCase().trim());
-            if(match != undefined){
-                validThemeName = true;
-                errorMessage = 'Theme name already exists'
-            } else{
-                validThemeName = false;
-            }
-        }
-    }
 
-    $: newThemeName, themeNameValidate();
-
-    //makes request to Figma to get style data
-    function getThemeData() {
+    //makes request to Figma plugin API to get style data
+    function getStyleData() {
 
         let styleTypes = {
             color: $styleTypeColor,
@@ -95,11 +109,11 @@
 
     }
 
+
+    //This function will run when the UI recieves data about the available styles back from the plugin code
     function validateStyleData(styles, publishedStatus) {
 
-        //first we need to
-
-
+        //first we need to 
 
     }
 
@@ -151,7 +165,7 @@
 
             <!-- Step 2 -->
             <div class="content__step">
-                <Radio bind:group={$styleSource} value="local">Local styles</Radio>
+                <Radio bind:group={$styleSource} value="local">Local styles (default)</Radio>
                 <Radio bind:group={$styleSource} value="selection">Styles in current selection</Radio>
                 <Radio bind:group={$styleSource} value="page">Styles on current page</Radio>
             </div>
@@ -160,7 +174,7 @@
             <div class="content__step">
                 <div class="flex column pl-xxsmall pr-xxsmall mb-xxsmall">
                     <Type class="pt-xxsmall pb-xxsmall">Theme name</Type>
-                    <Input iconName={IconTheme} placeholder="Unique theme name" borders=true bind:invalid={validThemeName} bind:errorMessage={errorMessage} bind:value={newThemeName}/> 
+                    <Input iconName={IconTheme} placeholder="Unique theme name" borders=true bind:invalid={invalidThemeName} bind:errorMessage={errorMessage} bind:value={newThemeName}/> 
                 </div>
                 <div class="flex column">
                     <Checkbox>Create multiple themes using prefixed style names</Checkbox>
@@ -179,7 +193,7 @@
             <li class="pager__dot" class:pager__dot--active="{$step === 2}" on:click={() => gotoToStep(2)}></li>
             <li class="pager__dot" class:pager__dot--active="{$step === 3}" on:click={() => gotoToStep(3)}></li>
         </ul>
-        <Button on:click={() => gotoToStep('next')} bind:disabled={styleTypeValid}>
+        <Button on:click={() => gotoToStep('next')} bind:disabled={styleTypeInvalid}>
             {#if $step === 3}
                 Create theme
             {:else}
