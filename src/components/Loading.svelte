@@ -5,7 +5,7 @@
 </script>
 
 
-<div class="loading" class:hidden="{$loading != false}">
+<div class="loading" class:hidden="{$loading != true}">
 	<div class="loading__animation">
 		<div class="loading__themer">
 				<svg fill="none" height="52" viewBox="0 0 52 52" width="52" xmlns="http://www.w3.org/2000/svg"><circle cx="26" cy="26" fill="#189ffb" r="22"/><g clip-rule="evenodd" fill="#fff" fill-rule="evenodd"><path d="m17.6935 19.9808 4.7678 4.6353-1.0456 1.0755-6.0924-5.9231c-.1452-.1412-.2271-.3351-.2271-.5377s.0819-.3966.2271-.5378l6.0924-5.923 1.0456 1.0755-4.7678 4.6353h18.4603v1.5z"/><path d="m34.3065 33.5192-4.7678 4.6354 1.0456 1.0755 6.0924-5.9231c.1452-.1412.2271-.3352.2271-.5378 0-.2025-.0819-.3965-.2271-.5377l-6.0924-5.9231-1.0456 1.0755 4.7678 4.6353h-18.4603v1.5z"/></g></svg>
@@ -23,18 +23,20 @@
 		position: absolute;
 		top: 0;
 		left:0;
-		z-index: 100;
+		opacity: 1.0;
+		z-index: 200;
 		width: 100%;
 		height: 100%;
 		background-color: rgba(255,255,255,1.0);
 		display: flex;
 		justify-content: center;
 		align-items: center;
-        transition: background-color 300ms linear;
     }
 
     .hidden {
         display: none;
+		opacity: 0;
+		transition: opacity 200ms ease-in-out;
     }
 
 

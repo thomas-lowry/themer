@@ -25,18 +25,50 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
+function __values(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+
+function __asyncValues(o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+}
+
 function isPublished(styles) {
+    var styles_1, styles_1_1;
+    var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
         let numOfStyles = styles.length;
         let numOfPublishedStyles = 0;
         let publishedStatus;
-        //check to see if each style is published
-        styles.forEach((style) => __awaiter(this, void 0, void 0, function* () {
-            let published = yield style.getPublishStatusAsync();
-            if (published === 'CURRENT') {
-                numOfPublishedStyles++;
+        try {
+            //check to see if each style is published
+            for (styles_1 = __asyncValues(styles); styles_1_1 = yield styles_1.next(), !styles_1_1.done;) {
+                const style = styles_1_1.value;
+                let published = yield style.getPublishStatusAsync();
+                if (published === 'CURRENT') {
+                    numOfPublishedStyles++;
+                }
             }
-        }));
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (styles_1_1 && !styles_1_1.done && (_a = styles_1.return)) yield _a.call(styles_1);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
         //determine if all styles are published, some, or none
         if (numOfPublishedStyles === numOfStyles) {
             publishedStatus = 'all';
@@ -65,30 +97,38 @@ function getLocalStyles(styleTypes) {
         //get color styles
         if (styleTypes.color === true) {
             let colorStyles = figma.getLocalPaintStyles();
-            if (colorStyles.length > 0) ;
+            if (colorStyles.length > 0) {
+                styles = styles.concat(colorStyles);
+            }
         }
         //get text
         if (styleTypes.text === true) {
             let textStyles = figma.getLocalTextStyles();
-            if (textStyles.length > 0) ;
+            if (textStyles.length > 0) {
+                styles = styles.concat(textStyles);
+            }
         }
         //get effects
         if (styleTypes.effect === true) {
             let effectStyles = figma.getLocalEffectStyles();
-            if (effectStyles.length > 0) ;
+            if (effectStyles.length > 0) {
+                styles = styles.concat(effectStyles);
+            }
         }
         //determine if ALL, SOME, or NONE of the styles are published
         let publishedStatus = yield isPublished(styles);
         //send the data back to the UI
         figma.ui.postMessage({
             'type': 'createStyleData',
-            'styles': styles,
+            'styles': JSON.stringify(styles),
             'publishedStatus': publishedStatus
         });
     });
 }
+//# sourceMappingURL=getLocalStyles.js.map
 
 const hasChildren = (node) => Boolean(node['children']);
+//# sourceMappingURL=hasChildren.js.map
 
 function removeDuplicatesBy(key, styleArray) {
     var mySet = new Set();
@@ -99,6 +139,7 @@ function removeDuplicatesBy(key, styleArray) {
         return isNew;
     });
 }
+//# sourceMappingURL=removeDuplicatesBy.js.map
 
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
@@ -195,6 +236,7 @@ function getStylesFromNode(node, styleTypes) {
         }));
     }
 }
+//# sourceMappingURL=getStylesFromNodes.js.map
 
 //imports
 function getStyleData(styleTypes, styleSource) {
@@ -228,6 +270,7 @@ function getStyleData(styleTypes, styleSource) {
         }
     }
 }
+//# sourceMappingURL=getStyleData.js.map
 
 //imports
 // show the UI
@@ -240,3 +283,4 @@ figma.ui.onmessage = msg => {
             break;
     }
 };
+//# sourceMappingURL=code.js.map

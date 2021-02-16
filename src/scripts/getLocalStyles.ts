@@ -19,7 +19,7 @@ export async function getLocalStyles(styleTypes) {
     if (styleTypes.color === true) {
         let colorStyles = figma.getLocalPaintStyles();
         if (colorStyles.length > 0) {
-            styles.concat(colorStyles);
+            styles = styles.concat(colorStyles);
         }
     }
 
@@ -27,7 +27,7 @@ export async function getLocalStyles(styleTypes) {
     if (styleTypes.text === true) {
         let textStyles = figma.getLocalTextStyles();
         if (textStyles.length > 0) {
-            styles.concat(textStyles);
+            styles = styles.concat(textStyles);
         }
     }
 
@@ -35,7 +35,7 @@ export async function getLocalStyles(styleTypes) {
     if (styleTypes.effect === true) {
         let effectStyles = figma.getLocalEffectStyles();
         if (effectStyles.length > 0) {
-            styles.concat(effectStyles);
+            styles = styles.concat(effectStyles);
         }
     }
 
@@ -45,7 +45,7 @@ export async function getLocalStyles(styleTypes) {
     //send the data back to the UI
     figma.ui.postMessage({
         'type': 'createStyleData',
-        'styles': styles,
+        'styles': JSON.stringify(styles),
         'publishedStatus': publishedStatus
     });
 

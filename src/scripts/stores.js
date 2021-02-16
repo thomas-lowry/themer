@@ -10,7 +10,7 @@ export const mainSection = writable('themes');
 export const flow = writable('themeList'); //themelist, createTheme, onboarding, deleteTheme, loading
 export const apiKey = writable('');
 export const binURL = writable('');
-export const loading = writable(true);
+export const loading = writable(false);
 
 //CREATE THEME VARS
 

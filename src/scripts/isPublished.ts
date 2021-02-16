@@ -5,12 +5,12 @@ export async function isPublished(styles:BaseStyle[]) {
     let publishedStatus:string;
 
     //check to see if each style is published
-    styles.forEach(async style => {
-        let published = await style.getPublishStatusAsync()
+    for await (const style of styles) {
+        let published = await style.getPublishStatusAsync();
         if (published === 'CURRENT') {
             numOfPublishedStyles++;
         }
-    });
+    }
 
     //determine if all styles are published, some, or none
     if (numOfPublishedStyles === numOfStyles) {
@@ -20,6 +20,7 @@ export async function isPublished(styles:BaseStyle[]) {
     } else {
         publishedStatus = 'none';
     }
+
 
     //return the results
     return publishedStatus;

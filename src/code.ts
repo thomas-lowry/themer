@@ -18,7 +18,7 @@ figma.ui.onmessage = msg => {
 	switch(msg.type){
 
 		case 'createTheme':
-			getStyleData(msg.styleTypes, msg.styleSource);
+            getStyleData(msg.styleTypes, msg.styleSource);
 		break;
 
 	} 

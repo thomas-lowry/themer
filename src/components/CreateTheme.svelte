@@ -4,8 +4,12 @@
     import { Button, Icon, IconButton, IconBack, IconTheme, Switch, Radio, Checkbox, Input, Type, Label } from 'figma-plugin-ds-svelte';
     import cssVars from 'svelte-css-vars';
     import { step, styleSource, styleTypeColor, styleTypeText, styleTypeEffect, winWidth, createThemeUI, loading, themes } from '../scripts/stores.js';
-    
-    let totalSteps = 3; //number of steps in the create theme process, easy to add more later
+
+    //var to store the raw style data we get back from Figma before processing it into theme data to store in JSON BIn
+    let rawStyleData;
+
+    //number of steps in the create theme process, easy to add more later
+    let totalSteps = 3; 
     
     //theme name
     let newThemeName; //stores name of theme, only use this value if the user does not use foldered/prefixed names
@@ -26,6 +30,18 @@
     }
     $: newThemeName, themeNameValidate(); //run this function every time the theme name changes 
     //(with a reactive declaration, we don't need on:input because the variable is bound to the input value)
+
+    //this option determines if the user wants to use prefixed style names
+    //default is set to false, it is bound to the checked value of the checkbox
+    let prefixedStyleNames = false;
+
+    //this var determines if there are prefixed style names available
+    //this won't be determined until trying to advance from step 2 - 3 where we request style data from the plugin code
+    //default is true so this option will be disabled unless available
+    let prefixedNamesAvailable = true;
+
+    //unique theme names
+    let uniqueThemeNamesFromPrefixes = [];
 
 
     //ui visible
@@ -71,26 +87,21 @@
         }
     }
 
+    //next / primary action button
+    // do different things based on step 1, 2, or 3
+    function nextStep() {
 
-    //navigate to a different step in the create thee flow
-    //it excepts a numerical value, 1, 2 or 3
-    //it can also accept a string "next" or "prev"
-    function gotoToStep(destination) {
-       if (typeof(destination) === 'number') {
-           $step = destination;
-       } else if (typeof(destination) === 'string') {
-           if(destination==='next') {
-                if ($step != totalSteps) {
-                    $step++;
-                }
-            } else if (destination === 'prev') {
-                if ($step != 1) {
-                    $step--;
-                }
-            }
-       }
+        if ($step === 1) {
+            $step = 2;
+        } else if ($step === 2) {
+            getStyleData();
+        }
     }
 
+
+    //nextButtonValidator
+    //this is a function that will bind the disabled value of the next button to a number of factors
+    //inputs: 
 
     //makes request to Figma plugin API to get style data
     function getStyleData() {
@@ -113,9 +124,37 @@
     //This function will run when the UI recieves data about the available styles back from the plugin code
     function validateStyleData(styles, publishedStatus) {
 
-        //first we need to 
+
+        //first we need to get the style data and populate a local var
+        rawStyleData = JSON.parse(styles);
+
+        console.log(rawStyleData);
+
+        //determine if prefixes are present
+        //if they are, put the prefix only into a new array
+        //if there is a duplicate, don't push it
+        //this way we can use the length of the array to determine amount of unqiue themes that will be created
+        styles.forEach(style => {
+            if (style.name.includes('/')) {
+                let prefix = name.split('/');
+                if (!uniqueThemeNamesFromPrefixes.some((item) => item === prefix[0])) {
+                    uniqueThemeNamesFromPrefixes.push(prefix[0]);
+                }
+            }
+        });
+
+        if (uniqueThemeNamesFromPrefixes.length > 0) {
+            prefixedNamesAvailable = false;
+        }
+
+        //advance to step 3
+        $step = 3;
+
+        //turn off the loading screen
+        $loading = false;
 
     }
+
 
     // listen for msgs from plugin code
 	window.onmessage = async (event) => {
@@ -177,7 +216,7 @@
                     <Input iconName={IconTheme} placeholder="Unique theme name" borders=true bind:invalid={invalidThemeName} bind:errorMessage={errorMessage} bind:value={newThemeName}/> 
                 </div>
                 <div class="flex column">
-                    <Checkbox>Create multiple themes using prefixed style names</Checkbox>
+                    <Checkbox bind:checked={prefixedStyleNames} bind:disabled={prefixedNamesAvailable}>Create multiple themes using prefixed style names</Checkbox>
                 </div>
             </div>
 
@@ -189,11 +228,11 @@
     <!-- Footer -->
     <div class="footer flex row justify-content-between align-items-center pl-xsmall pr-xsmall">
         <ul class="pager flex row">
-            <li class="pager__dot" class:pager__dot--active="{$step === 1}" on:click={() => gotoToStep(1)}></li>
-            <li class="pager__dot" class:pager__dot--active="{$step === 2}" on:click={() => gotoToStep(2)}></li>
-            <li class="pager__dot" class:pager__dot--active="{$step === 3}" on:click={() => gotoToStep(3)}></li>
+            <li class="pager__dot" class:pager__dot--active="{$step === 1}" on:click={() => { if($step === 2 || $step === 3) { $step = 1 }}}></li>
+            <li class="pager__dot" class:pager__dot--active="{$step === 2}" on:click={() => { if($step === 3) { $step = 2 }}}></li>
+            <li class="pager__dot" class:pager__dot--active="{$step === 3}"></li>
         </ul>
-        <Button on:click={() => gotoToStep('next')} bind:disabled={styleTypeInvalid}>
+        <Button on:click={nextStep} bind:disabled={styleTypeInvalid}>
             {#if $step === 3}
                 Create theme
             {:else}
@@ -313,10 +352,6 @@
     margin-right: 8px;
     background-color: var(--black1);
     border-radius: 4px;
-}
-
-.pager__dot:hover {
-    background-color: var(--black3);
 }
 
 .pager__dot--active {
