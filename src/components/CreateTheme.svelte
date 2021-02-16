@@ -15,6 +15,8 @@
     let newThemeName; //stores name of theme, only use this value if the user does not use foldered/prefixed names
     let invalidThemeName = false; //this will be true if the name of the theme is invalid (currently only checks for duplicate theme names)
     let errorMessage; //if there is an error with theme name, this stores the msg to display under the theme name input field
+    let themeNamePlaceholder = "Unique theme name";
+
 
     //Validates the name of the theme
     function themeNameValidate() {
@@ -29,7 +31,17 @@
         }
     }
     $: newThemeName, themeNameValidate(); //run this function every time the theme name changes 
-    //(with a reactive declaration, we don't need on:input because the variable is bound to the input value)
+    $: prefixedStyleNames, themeNameInput();
+    
+    //runs when prefixed style name checkbox changes valye
+    //if enabled, will update the placeholder text when the field is disabled
+    function themeNameInput() {
+        if (prefixedStyleNames === true) {
+            themeNamePlaceholder = uniqueThemeNamesFromPrefixes.join('/... ') + '/...';
+        } else {
+            themeNamePlaceholder = "Unique theme name";
+        }
+    }
 
     //this option determines if the user wants to use prefixed style names
     //default is set to false, it is bound to the checked value of the checkbox
@@ -38,7 +50,7 @@
     //this var determines if there are prefixed style names available
     //this won't be determined until trying to advance from step 2 - 3 where we request style data from the plugin code
     //default is true so this option will be disabled unless available
-    let prefixedNamesAvailable = true;
+    let prefixedNamesUnavailable = true;
 
     //unique theme names
     let uniqueThemeNamesFromPrefixes = [];
@@ -58,7 +70,12 @@
         $styleTypeText = false;
         $styleTypeEffect = false;
         newThemeName = null;
+        themeNamePlaceholder = "Unique theme name";
         invalidThemeName = false;
+        uniqueThemeNamesFromPrefixes = [];
+        prefixedStyleNames = false;
+        prefixedNamesUnavailable = false;
+
 
     }
     $: $createThemeUI, resetCreateThemeUI(); //this var controls visibility of the create theme UI, run the reset when this value changes
@@ -72,20 +89,15 @@
     };
 
 
-    //check to see if at least one type of style switch selected
-    //if none are selected, the styleTypeInvalid var will be true
-    let styleTypeInvalid;
-    $: $styleTypeColor, validateStyleTypes();
-    $: $styleTypeText, validateStyleTypes();
-    $: $styleTypeEffect, validateStyleTypes();
+    //Reactive delcarations for a number of variable changes
+    //that can impact the next/complete disabled state
+    $: $step, validateButton();
+    $: $styleTypeColor, validateButton();
+    $: $styleTypeText, validateButton();
+    $: $styleTypeEffect, validateButton();
+    $: newThemeName, validateButton();
+    $: prefixedStyleNames, validateButton();
 
-    function validateStyleTypes() {
-        if ($styleTypeColor === false && $styleTypeText === false && $styleTypeEffect === false) {
-            styleTypeInvalid = true;
-        } else {
-            styleTypeInvalid = false;
-        }
-    }
 
     //next / primary action button
     // do different things based on step 1, 2, or 3
@@ -101,7 +113,37 @@
 
     //nextButtonValidator
     //this is a function that will bind the disabled value of the next button to a number of factors
-    //inputs: 
+    
+    let buttonDisabled;
+
+    function validateButton() {
+
+        if ($step === 1) {
+            
+            if ($styleTypeColor === false && $styleTypeText === false && $styleTypeEffect === false) {
+                buttonDisabled = true;
+            } else {
+                buttonDisabled = false;
+            }
+
+        } else if ($step === 2) {
+
+            buttonDisabled =  false;
+
+        } else if ($step === 3) {
+
+            if (invalidThemeName === true || newThemeName === '' || newThemeName === null || newThemeName === undefined) {
+                buttonDisabled =  true;
+            } else {
+                buttonDisabled =  false;
+            }
+
+            if (prefixedStyleNames === true) {
+                buttonDisabled =  false;
+            }
+
+        }
+    }
 
     //makes request to Figma plugin API to get style data
     function getStyleData() {
@@ -126,9 +168,7 @@
 
 
         //first we need to get the style data and populate a local var
-        rawStyleData = JSON.parse(styles);
-
-        console.log(rawStyleData);
+        rawStyleData = styles;
 
         //determine if prefixes are present
         //if they are, put the prefix only into a new array
@@ -136,22 +176,28 @@
         //this way we can use the length of the array to determine amount of unqiue themes that will be created
         styles.forEach(style => {
             if (style.name.includes('/')) {
-                let prefix = name.split('/');
-                if (!uniqueThemeNamesFromPrefixes.some((item) => item === prefix[0])) {
+                let prefix = style.name.split('/');
+                if (!uniqueThemeNamesFromPrefixes.some(themePrefix => themePrefix === prefix[0])) {
                     uniqueThemeNamesFromPrefixes.push(prefix[0]);
                 }
             }
         });
 
-        if (uniqueThemeNamesFromPrefixes.length > 0) {
-            prefixedNamesAvailable = false;
+        if (uniqueThemeNamesFromPrefixes[0].length >= 1) {
+            prefixedNamesUnavailable = false;
+        } else {
+            prefixedNamesUnavailable = true;
         }
+
+        console.log(uniqueThemeNamesFromPrefixes.length);
 
         //advance to step 3
         $step = 3;
 
         //turn off the loading screen
-        $loading = false;
+        setTimeout(function(){ 
+            $loading = false;
+        }, 1000);
 
     }
 
@@ -213,11 +259,25 @@
             <div class="content__step">
                 <div class="flex column pl-xxsmall pr-xxsmall mb-xxsmall">
                     <Type class="pt-xxsmall pb-xxsmall">Theme name</Type>
-                    <Input iconName={IconTheme} placeholder="Unique theme name" borders=true bind:invalid={invalidThemeName} bind:errorMessage={errorMessage} bind:value={newThemeName}/> 
+                    <Input iconName={IconTheme} bind:placeholder={themeNamePlaceholder} borders=true bind:invalid={invalidThemeName} bind:errorMessage={errorMessage} bind:value={newThemeName} bind:disabled={prefixedStyleNames}/> 
                 </div>
                 <div class="flex column">
-                    <Checkbox bind:checked={prefixedStyleNames} bind:disabled={prefixedNamesAvailable}>Create multiple themes using prefixed style names</Checkbox>
+                    <Checkbox bind:checked={prefixedStyleNames} bind:disabled={prefixedNamesUnavailable}>Create multiple themes using prefixed style names</Checkbox>
                 </div>
+
+                {#if prefixedStyleNames === true}
+                    <div class="flex column pl-medium">
+                    <Type color="blue">
+                        Themer will create {uniqueThemeNamesFromPrefixes.length} 
+                        {#if uniqueThemeNamesFromPrefixes.length > 1}
+                            themes
+                        {:else}
+                            theme
+                        {/if}
+                        from prefixed style names.
+                    </Type>
+                    </div>
+                {/if}
             </div>
 
         </div>
@@ -232,7 +292,7 @@
             <li class="pager__dot" class:pager__dot--active="{$step === 2}" on:click={() => { if($step === 3) { $step = 2 }}}></li>
             <li class="pager__dot" class:pager__dot--active="{$step === 3}"></li>
         </ul>
-        <Button on:click={nextStep} bind:disabled={styleTypeInvalid}>
+        <Button on:click={nextStep} bind:disabled={buttonDisabled}>
             {#if $step === 3}
                 Create theme
             {:else}

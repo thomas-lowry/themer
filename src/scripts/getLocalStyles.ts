@@ -1,5 +1,6 @@
 //imports
 import { isPublished } from "./isPublished";
+import { assembleStylesArray } from "./assembleStylesArray";
 
 export async function getLocalStyles(styleTypes) {
 
@@ -45,7 +46,7 @@ export async function getLocalStyles(styleTypes) {
     //send the data back to the UI
     figma.ui.postMessage({
         'type': 'createStyleData',
-        'styles': JSON.stringify(styles),
+        'styles': assembleStylesArray(styles),
         'publishedStatus': publishedStatus
     });
 

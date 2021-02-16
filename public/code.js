@@ -83,6 +83,22 @@ function isPublished(styles) {
         return publishedStatus;
     });
 }
+//# sourceMappingURL=isPublished.js.map
+
+function assembleStylesArray(styles) {
+    let stylesArray = [];
+    styles.forEach(style => {
+        let item = {
+            name: style.name,
+            id: style.id,
+            key: style.key,
+            type: style.type
+        };
+        stylesArray.push(item);
+    });
+    return stylesArray;
+}
+//# sourceMappingURL=assembleStylesArray.js.map
 
 function getLocalStyles(styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -120,7 +136,7 @@ function getLocalStyles(styleTypes) {
         //send the data back to the UI
         figma.ui.postMessage({
             'type': 'createStyleData',
-            'styles': JSON.stringify(styles),
+            'styles': assembleStylesArray(styles),
             'publishedStatus': publishedStatus
         });
     });
@@ -155,7 +171,7 @@ function getStylesFromNodes(nodes, styleTypes) {
         //send the data back to the UI
         figma.ui.postMessage({
             'type': 'createStyleData',
-            'styles': styles,
+            'styles': assembleStylesArray(styles),
             'publishedStatus': publishedStatus
         });
     });
@@ -236,7 +252,6 @@ function getStylesFromNode(node, styleTypes) {
         }));
     }
 }
-//# sourceMappingURL=getStylesFromNodes.js.map
 
 //imports
 function getStyleData(styleTypes, styleSource) {

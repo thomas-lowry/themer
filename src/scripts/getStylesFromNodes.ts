@@ -2,6 +2,7 @@
 import { hasChildren } from "./hasChildren";
 import { removeDuplicatesBy } from "./removeDuplicatesBy";
 import { isPublished } from "./isPublished";
+import { assembleStylesArray } from "./assembleStylesArray";
 
 let styles:BaseStyle[] = [];
 
@@ -21,7 +22,7 @@ export async function getStylesFromNodes(nodes:SceneNode[], styleTypes) {
     //send the data back to the UI
     figma.ui.postMessage({
         'type': 'createStyleData',
-        'styles': styles,
+        'styles': assembleStylesArray(styles),
         'publishedStatus': publishedStatus
     });
 

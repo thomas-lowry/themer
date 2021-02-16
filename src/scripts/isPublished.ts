@@ -21,7 +21,6 @@ export async function isPublished(styles:BaseStyle[]) {
         publishedStatus = 'none';
     }
 
-
     //return the results
     return publishedStatus;
     
