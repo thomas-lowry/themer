@@ -83,7 +83,6 @@ function isPublished(styles) {
         return publishedStatus;
     });
 }
-//# sourceMappingURL=isPublished.js.map
 
 function assembleStylesArray(styles) {
     let stylesArray = [];
@@ -98,7 +97,6 @@ function assembleStylesArray(styles) {
     });
     return stylesArray;
 }
-//# sourceMappingURL=assembleStylesArray.js.map
 
 function getLocalStyles(styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -141,10 +139,8 @@ function getLocalStyles(styleTypes) {
         });
     });
 }
-//# sourceMappingURL=getLocalStyles.js.map
 
 const hasChildren = (node) => Boolean(node['children']);
-//# sourceMappingURL=hasChildren.js.map
 
 function removeDuplicatesBy(key, styleArray) {
     var mySet = new Set();
@@ -155,7 +151,6 @@ function removeDuplicatesBy(key, styleArray) {
         return isNew;
     });
 }
-//# sourceMappingURL=removeDuplicatesBy.js.map
 
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
@@ -285,7 +280,6 @@ function getStyleData(styleTypes, styleSource) {
         }
     }
 }
-//# sourceMappingURL=getStyleData.js.map
 
 //imports
 // show the UI
@@ -298,4 +292,3 @@ figma.ui.onmessage = msg => {
             break;
     }
 };
-//# sourceMappingURL=code.js.map
