@@ -5,7 +5,7 @@ import {windowWidth, windowHeight } from '../scripts/windowSize';
 //exports
 
 //export const themes = readable([]);
-export const themes = readable([{name: 'themeA'}, {name: 'themeB'}, {name: 'themeC'}, {name: 'themeD'}, {name: 'themeE'}, {name: 'themeF'}, {name: 'themeG'}, {name: 'themeH'}, {name: 'themeI'}, {name: 'themeJ'}, {name: 'themeK'}, {name: 'themeJ'}, {name: 'themeL'}]);
+export const themes = readable([]);
 export const mainSection = writable('themes');
 export const flow = writable('themeList'); //themelist, createTheme, onboarding, deleteTheme, loading
 export const apiKey = writable('');

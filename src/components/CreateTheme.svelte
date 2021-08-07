@@ -37,7 +37,7 @@
     //if enabled, will update the placeholder text when the field is disabled
     function themeNameInput() {
         if (prefixedStyleNames === true) {
-            themeNamePlaceholder = 'Themes: ' + uniqueThemeNamesFromPrefixes.join(', ');
+            themeNamePlaceholder = uniqueThemeNamesFromPrefixes.join(', ');
         } else {
             themeNamePlaceholder = "Unique theme name";
         }
