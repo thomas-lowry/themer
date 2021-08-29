@@ -18,6 +18,3 @@ In order for Themer to be used across your team, generic information about your 
 
 ### Privacy:
 Themer stores information about your styles at a service esternal to Figma. For each theme, we store the name of the theme, the name of the style, the type of style (color, text, effect), and a unique key required to import your styles into a document from your team library. No other data from your file is sent to Jsonbin. Your unique API key is storred locally as well, so if you use Themer across devices, between team members, or between Figma Desktop and Figma in the browser, you will need to re-enter your API key and your Bin URL so that everyone/everywhere has access to the same list of Themes.
-
-### Roadmap:
-• Currently Themer does not yet work text boxes which contan multiple text styles, the plan is to enable this in the near future
