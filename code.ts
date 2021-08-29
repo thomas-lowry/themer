@@ -551,6 +551,43 @@ function applyTheme(applyTo) {
     }
 }
 
+type RangeStyle = {
+    start: number;
+    end: number;
+    style: string;
+};
+type RangeStyleType = "fill" | "text";
+
+function getStyleRanges(node: TextNode, start: number, end: number, type: RangeStyleType): RangeStyle[] {
+    const style = type === "fill" ? node.getRangeFillStyleId(start, end) : node.getRangeTextStyleId(start, end);
+    if (typeof style === "string") return [{ start, end, style }];
+    else {
+        const middle = Math.floor(start + ((end - start) / 2));
+        return [...getStyleRanges(node, start, middle, type), ...getStyleRanges(node, middle, end, type)];
+    }
+}
+
+function combineStyleRanges(styles: RangeStyle[]): RangeStyle[] {
+    return styles.reduce((gathered: RangeStyle[], current: RangeStyle) => {
+        const newGathered: RangeStyle[] = [...gathered];
+        const existingRange = newGathered.findIndex((v: RangeStyle) => current.style === v.style && current.start === v.end);
+        if (existingRange > 0) {
+            newGathered[existingRange].end = current.end;
+            return newGathered;
+        }
+        else {
+            newGathered.push(current);
+            return newGathered;
+        }
+    }, []);
+}
+
+function getStyles(node: TextNode): { fillStyles: RangeStyle[]; textStyles: RangeStyle[]; } {
+    const fillStyleRanges = getStyleRanges(node, 0, node.characters.length, "fill");
+    const textStyleRanges = getStyleRanges(node, 0, node.characters.length, "text");
+    return { fillStyles: combineStyleRanges(fillStyleRanges), textStyles: combineStyleRanges(textStyleRanges) };
+}
+
 // this function will loop through every node and apply a matching color style if found
 // it will ignore any layer without a fill, background, or stroke style applied
 function applyColor(node) {
@@ -581,7 +618,7 @@ function applyColor(node) {
     }
 
     //handle fills + strokes
-    if (node.type === 'RECTANGLE'||'POLYGON'||'ELLIPSE'||'STAR'||'TEXT'||'VECTOR'||'BOOLEAN_OPERATION'||'LINE') {
+    if (node.type === 'RECTANGLE'||'POLYGON'||'ELLIPSE'||'STAR'||'VECTOR'||'BOOLEAN_OPERATION'||'LINE') {
         //fills
         if (node.fillStyleId) {
             (async function() {
@@ -611,6 +648,45 @@ function applyColor(node) {
                     }
                 }
             })()
+        }
+    }
+
+    // handle text fills
+    if (node.type === 'TEXT') {
+        if (node.fillStyleId) {
+            // single fill
+            if (typeof node.fillStyleId !== 'symbol') {
+                (async function() {
+                    let style = figma.getStyleById(node.fillStyleId) as PaintStyle;
+                    if (style.key) {
+                        let newStyleKey = findMatchInSelectedTheme(style.key);
+                        if (newStyleKey) {
+                            let newStyle = await figma.importStyleByKeyAsync(newStyleKey) as PaintStyle;
+                            if (newStyle) {
+                                node.fillStyleId = newStyle.id;
+                            }
+                        }
+                    }
+                })()
+            } else {
+                (async function() {
+                    let fillRanges = combineStyleRanges(getStyleRanges(node, 0, node.characters.length, "fill"));
+                    for (const fillRange of fillRanges) {
+                        if (fillRange.style.length > 0) {
+                            let style = figma.getStyleById(fillRange.style) as PaintStyle;
+                            if (style.key) {
+                                let newStyleKey = findMatchInSelectedTheme(style.key);
+                                if (newStyleKey) {
+                                    let newStyle = await figma.importStyleByKeyAsync(newStyleKey) as PaintStyle;
+                                    if (newStyle) {
+                                        (node as TextNode).setRangeFillStyleId(fillRange.start, fillRange.end, newStyle.id);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })()
+            }
         }
     }
 }
@@ -646,7 +722,29 @@ function applyText(node) {
                     }
                 })()
             } else {
-                figma.notify('Note: Themer currently skips text objects with multiple text styles applied.')
+                (async function() {
+                    let textRanges = combineStyleRanges(getStyleRanges(node, 0, node.characters.length, "text"));
+                    for (const textRange of textRanges) {
+                        if (textRange.style.length > 0) {
+                            let style = figma.getStyleById(textRange.style) as TextStyle;
+                            if (style.key) {
+                                let newStyleKey = findMatchInSelectedTheme(style.key);
+                                if (newStyleKey) {
+                                    let newStyle = await figma.importStyleByKeyAsync(newStyleKey) as TextStyle;
+                                    let fontFamily = newStyle.fontName.family;
+                                    let fontStyle = newStyle.fontName.style;
+                                    await figma.loadFontAsync({
+                                        'family': fontFamily,
+                                        'style': fontStyle
+                                    });
+                                    if (newStyle) {
+                                        (node as TextNode).setRangeTextStyleId(textRange.start, textRange.end, newStyle.id);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })();
             }
         }
     }

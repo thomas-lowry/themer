@@ -1,9 +1,10 @@
 // VARS
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -53,6 +54,17 @@ var __read = (this && this.__read) || function (o, n) {
 var __spread = (this && this.__spread) || function () {
     for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
     return ar;
+};
+var __values = (this && this.__values) || function(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
 var _this = this;
 // API credentials
@@ -596,6 +608,34 @@ function applyTheme(applyTo) {
         figma.notify('There is nothing to apply styles to');
     }
 }
+function getStyleRanges(node, start, end, type) {
+    var style = type === "fill" ? node.getRangeFillStyleId(start, end) : node.getRangeTextStyleId(start, end);
+    if (typeof style === "string")
+        return [{ start: start, end: end, style: style }];
+    else {
+        var middle = Math.floor(start + ((end - start) / 2));
+        return __spread(getStyleRanges(node, start, middle, type), getStyleRanges(node, middle, end, type));
+    }
+}
+function combineStyleRanges(styles) {
+    return styles.reduce(function (gathered, current) {
+        var newGathered = __spread(gathered);
+        var existingRange = newGathered.findIndex(function (v) { return current.style === v.style && current.start === v.end; });
+        if (existingRange > 0) {
+            newGathered[existingRange].end = current.end;
+            return newGathered;
+        }
+        else {
+            newGathered.push(current);
+            return newGathered;
+        }
+    }, []);
+}
+function getStyles(node) {
+    var fillStyleRanges = getStyleRanges(node, 0, node.characters.length, "fill");
+    var textStyleRanges = getStyleRanges(node, 0, node.characters.length, "text");
+    return { fillStyles: combineStyleRanges(fillStyleRanges), textStyles: combineStyleRanges(textStyleRanges) };
+}
 // this function will loop through every node and apply a matching color style if found
 // it will ignore any layer without a fill, background, or stroke style applied
 function applyColor(node) {
@@ -633,7 +673,7 @@ function applyColor(node) {
         }
     }
     //handle fills + strokes
-    if (node.type === 'RECTANGLE' || 'POLYGON' || 'ELLIPSE' || 'STAR' || 'TEXT' || 'VECTOR' || 'BOOLEAN_OPERATION' || 'LINE') {
+    if (node.type === 'RECTANGLE' || 'POLYGON' || 'ELLIPSE' || 'STAR' || 'VECTOR' || 'BOOLEAN_OPERATION' || 'LINE') {
         //fills
         if (node.fillStyleId) {
             (function () {
@@ -685,6 +725,85 @@ function applyColor(node) {
             })();
         }
     }
+    // handle text fills
+    if (node.type === 'TEXT') {
+        if (node.fillStyleId) {
+            // single fill
+            if (typeof node.fillStyleId !== 'symbol') {
+                (function () {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var style, newStyleKey, newStyle;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    style = figma.getStyleById(node.fillStyleId);
+                                    if (!style.key) return [3 /*break*/, 2];
+                                    newStyleKey = findMatchInSelectedTheme(style.key);
+                                    if (!newStyleKey) return [3 /*break*/, 2];
+                                    return [4 /*yield*/, figma.importStyleByKeyAsync(newStyleKey)];
+                                case 1:
+                                    newStyle = _a.sent();
+                                    if (newStyle) {
+                                        node.fillStyleId = newStyle.id;
+                                    }
+                                    _a.label = 2;
+                                case 2: return [2 /*return*/];
+                            }
+                        });
+                    });
+                })();
+            }
+            else {
+                (function () {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var fillRanges, fillRanges_1, fillRanges_1_1, fillRange, style, newStyleKey, newStyle, e_1_1;
+                        var e_1, _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    fillRanges = combineStyleRanges(getStyleRanges(node, 0, node.characters.length, "fill"));
+                                    _b.label = 1;
+                                case 1:
+                                    _b.trys.push([1, 6, 7, 8]);
+                                    fillRanges_1 = __values(fillRanges), fillRanges_1_1 = fillRanges_1.next();
+                                    _b.label = 2;
+                                case 2:
+                                    if (!!fillRanges_1_1.done) return [3 /*break*/, 5];
+                                    fillRange = fillRanges_1_1.value;
+                                    if (!(fillRange.style.length > 0)) return [3 /*break*/, 4];
+                                    style = figma.getStyleById(fillRange.style);
+                                    if (!style.key) return [3 /*break*/, 4];
+                                    newStyleKey = findMatchInSelectedTheme(style.key);
+                                    if (!newStyleKey) return [3 /*break*/, 4];
+                                    return [4 /*yield*/, figma.importStyleByKeyAsync(newStyleKey)];
+                                case 3:
+                                    newStyle = _b.sent();
+                                    if (newStyle) {
+                                        node.setRangeFillStyleId(fillRange.start, fillRange.end, newStyle.id);
+                                    }
+                                    _b.label = 4;
+                                case 4:
+                                    fillRanges_1_1 = fillRanges_1.next();
+                                    return [3 /*break*/, 2];
+                                case 5: return [3 /*break*/, 8];
+                                case 6:
+                                    e_1_1 = _b.sent();
+                                    e_1 = { error: e_1_1 };
+                                    return [3 /*break*/, 8];
+                                case 7:
+                                    try {
+                                        if (fillRanges_1_1 && !fillRanges_1_1.done && (_a = fillRanges_1["return"])) _a.call(fillRanges_1);
+                                    }
+                                    finally { if (e_1) throw e_1.error; }
+                                    return [7 /*endfinally*/];
+                                case 8: return [2 /*return*/];
+                            }
+                        });
+                    });
+                })();
+            }
+        }
+    }
 }
 //apply text styles
 function applyText(node) {
@@ -730,7 +849,61 @@ function applyText(node) {
                 })();
             }
             else {
-                figma.notify('Note: Themer currently skips text objects with multiple text styles applied.');
+                (function () {
+                    return __awaiter(this, void 0, void 0, function () {
+                        var textRanges, textRanges_1, textRanges_1_1, textRange, style, newStyleKey, newStyle, fontFamily, fontStyle, e_2_1;
+                        var e_2, _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    textRanges = combineStyleRanges(getStyleRanges(node, 0, node.characters.length, "text"));
+                                    _b.label = 1;
+                                case 1:
+                                    _b.trys.push([1, 7, 8, 9]);
+                                    textRanges_1 = __values(textRanges), textRanges_1_1 = textRanges_1.next();
+                                    _b.label = 2;
+                                case 2:
+                                    if (!!textRanges_1_1.done) return [3 /*break*/, 6];
+                                    textRange = textRanges_1_1.value;
+                                    if (!(textRange.style.length > 0)) return [3 /*break*/, 5];
+                                    style = figma.getStyleById(textRange.style);
+                                    if (!style.key) return [3 /*break*/, 5];
+                                    newStyleKey = findMatchInSelectedTheme(style.key);
+                                    if (!newStyleKey) return [3 /*break*/, 5];
+                                    return [4 /*yield*/, figma.importStyleByKeyAsync(newStyleKey)];
+                                case 3:
+                                    newStyle = _b.sent();
+                                    fontFamily = newStyle.fontName.family;
+                                    fontStyle = newStyle.fontName.style;
+                                    return [4 /*yield*/, figma.loadFontAsync({
+                                            'family': fontFamily,
+                                            'style': fontStyle
+                                        })];
+                                case 4:
+                                    _b.sent();
+                                    if (newStyle) {
+                                        node.setRangeTextStyleId(textRange.start, textRange.end, newStyle.id);
+                                    }
+                                    _b.label = 5;
+                                case 5:
+                                    textRanges_1_1 = textRanges_1.next();
+                                    return [3 /*break*/, 2];
+                                case 6: return [3 /*break*/, 9];
+                                case 7:
+                                    e_2_1 = _b.sent();
+                                    e_2 = { error: e_2_1 };
+                                    return [3 /*break*/, 9];
+                                case 8:
+                                    try {
+                                        if (textRanges_1_1 && !textRanges_1_1.done && (_a = textRanges_1["return"])) _a.call(textRanges_1);
+                                    }
+                                    finally { if (e_2) throw e_2.error; }
+                                    return [7 /*endfinally*/];
+                                case 9: return [2 /*return*/];
+                            }
+                        });
+                    });
+                })();
             }
         }
     }
