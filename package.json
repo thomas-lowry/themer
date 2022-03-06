@@ -1,0 +1,18 @@
+{
+  "name": "themer-next",
+  "version": "1.0.0",
+  "description": "A Figma plugin designed to allow you to swap between styles named the same from different published libraries.",
+  "main": "code.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "contributors": [
+    "Florian Sénat <florian.senat@protonmail.com>",
+    "Tom Lowry (https://github.com/thomas-lowry)"
+  ],
+  "license": "",
+  "devDependencies": {
+    "@figma/plugin-typings": "*",
+    "typescript": "*"
+  }
+}
