@@ -1,4 +1,3 @@
-// VARS
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,103 +7,97 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-// API credentials
-var apiSecret;
-var apiURL;
+let apiSecret;
+let apiURL;
 // THEME DATA VARS
 // this is the latest data from JSON Bin,
 // we will append this to the cleaned data
-var jsonBinData = [];
+let jsonBinData = [];
 // this is all of the raw styles data we collect when creating a new theme
 // it may contain duplicates, and themes using prefixed names have not been split up
-var collectedStyleData = [];
+let collectedStyleData = [];
 // clean data, this is an array of all of the processed new data
-var cleanedStyleData = [];
-// this is the assembled clean data that is ready 
+let cleanedStyleData = [];
+// this is the assembled clean data that is ready
 // to be sent back to the UI to push to JSON bin
-var newJsonBinData = [];
+let newJsonBinData = [];
 // settings
-var usePrefixes;
-var newThemeName;
-var newThemeCount = 0;
-var existingThemeCount;
-//vars for applying
-var selectedTheme;
-// show the UI
+let usePrefixes;
+let newThemeName;
+let newThemeCount = 0;
+let existingThemeCount;
+let selectedTheme;
 figma.showUI(__html__, { width: 240, height: 312 });
-//INITIALIZE PLUGIN
-//Check to see if credentials exist in client storage
-//run on plugin initilization
-(() => __awaiter(this, void 0, void 0, function* () {
-    try {
-        apiURL = yield figma.clientStorage.getAsync('apiURL');
-        apiSecret = yield figma.clientStorage.getAsync('apiSecret');
-        if (apiURL && apiSecret) {
-            //send a message to the UI with the credentials storred in the client
-            figma.ui.postMessage({
-                'type': 'apiCredentials',
-                'status': true,
-                'url': apiURL,
-                'secret': apiSecret
-            });
+function init() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            apiURL = yield figma.clientStorage.getAsync("apiURL");
+            apiSecret = yield figma.clientStorage.getAsync("apiSecret");
+            if (apiURL && apiSecret) {
+                //send a message to the UI with the credentials storred in the client
+                figma.ui.postMessage({
+                    type: "apiCredentials",
+                    status: true,
+                    url: apiURL,
+                    secret: apiSecret,
+                });
+            }
+            else {
+                figma.ui.postMessage({
+                    type: "apiCredentials",
+                    status: false,
+                });
+            }
         }
-        else {
-            //send a message to the UI that says there are no credentials storred in the client
-            figma.ui.postMessage({
-                'type': 'apiCredentials',
-                'status': false
-            });
+        catch (err) {
+            figma.closePlugin("An error occured while initializing the plugin.");
+            return;
         }
-    }
-    catch (err) {
-        figma.closePlugin('There was an error.');
-        return;
-    }
-}))();
+    });
+}
+init();
 //MESSAGING TO PLUGIN UI
 figma.ui.onmessage = (msg) => __awaiter(this, void 0, void 0, function* () {
     switch (msg.type) {
-        case 'notify':
+        case "notify":
             figma.notify(msg.msg, { timeout: 1500 });
             break;
-        case 'initialThemerData':
+        case "initialThemerData":
             updateCredentials(msg.secret, msg.url);
             figma.notify(msg.msg, { timeout: 1000 });
             break;
-        case 'applyTheme':
+        case "applyTheme":
             selectedTheme = msg.themeName;
             applyTheme(msg.applyTo);
             break;
-        case 'createTheme':
+        case "createTheme":
             updatedDataFromAPI(msg.apiData);
             createTheme(msg);
             break;
-        case 'deleteTheme':
+        case "deleteTheme":
             updatedDataFromAPI(msg.themeData);
             figma.notify(msg.msg, { timeout: 1000 });
             break;
-        case 'updateThemes':
+        case "updateThemes":
             updatedDataFromAPI(msg.themeData);
             break;
-        case 'reset':
+        case "reset":
             resetThemer();
             break;
     }
 });
-//RESET THEMER
 function resetThemer() {
     (() => __awaiter(this, void 0, void 0, function* () {
         try {
-            yield figma.clientStorage.setAsync('apiSecret', '');
-            yield figma.clientStorage.setAsync('apiURL', '');
+            yield figma.clientStorage.setAsync("apiSecret", "");
+            yield figma.clientStorage.setAsync("apiURL", "");
         }
         catch (err) {
-            figma.notify('There was an issue saving your credentials. Please try again.');
+            figma.notify("There was an issue saving your credentials. Please try again.");
         }
     }))();
-    figma.notify('Themer reset successfully');
+    figma.notify("Themer reset successfully");
 }
-// CREATE THEMES
 function createTheme(data) {
     // set prefixes setting
     if (data.usePrefixes === true) {
@@ -121,66 +114,66 @@ function createTheme(data) {
     // use the correct method to collect styles
     // based on user selection
     switch (data.source) {
-        case 'local':
+        case "local":
             //get styles
             if (data.colorStyles) {
-                getLocalStyles('color');
+                getLocalStyles("color");
             }
             if (data.textStyles) {
-                getLocalStyles('text');
+                getLocalStyles("text");
             }
             if (data.effectStyles) {
-                getLocalStyles('effect');
+                getLocalStyles("effect");
             }
             break;
-        case 'selection':
+        case "selection":
             // get styles from selection
             let selection = Array.from(figma.currentPage.selection);
             if (selection) {
                 //get styles
                 if (data.colorStyles) {
-                    selection.forEach(node => {
+                    selection.forEach((node) => {
                         collectColorStyles(node);
                     });
                 }
                 if (data.textStyles) {
-                    selection.forEach(node => {
+                    selection.forEach((node) => {
                         collectTextStyles(node);
                     });
                 }
                 if (data.effectStyles) {
-                    selection.forEach(node => {
+                    selection.forEach((node) => {
                         collectEffectStyles(node);
                     });
                 }
             }
             else {
-                figma.notify('Please make a selection');
+                figma.notify("Please make a selection");
             }
             break;
-        case 'page':
+        case "page":
             //get nodes from entire page
             let pageNodes = Array.from(figma.currentPage.children);
             if (pageNodes) {
                 //get styles
                 if (data.colorStyles) {
-                    pageNodes.forEach(node => {
+                    pageNodes.forEach((node) => {
                         collectColorStyles(node);
                     });
                 }
                 if (data.textStyles) {
-                    pageNodes.forEach(node => {
+                    pageNodes.forEach((node) => {
                         collectTextStyles(node);
                     });
                 }
                 if (data.effectStyles) {
-                    pageNodes.forEach(node => {
+                    pageNodes.forEach((node) => {
                         collectEffectStyles(node);
                     });
                 }
             }
             else {
-                figma.notify('There is nothing on this page');
+                figma.notify("There is nothing on this page");
             }
             break;
     }
@@ -194,125 +187,130 @@ function createTheme(data) {
     // send data back to UI to post to JSON bin
     sendNewThemeDataToUI();
 }
-//collect styles from local styles
 function getLocalStyles(type) {
-    if (type === 'color') {
+    if (type === "color") {
         let colorStyles = figma.getLocalPaintStyles();
         if (colorStyles) {
-            colorStyles.forEach(color => {
+            colorStyles.forEach((color) => {
                 let style = {
-                    'name': styleName(color.name),
-                    'key': color.key,
-                    'theme': themeName(color.name),
-                    'type': 'PAINT'
+                    name: styleName(color.name),
+                    key: color.key,
+                    theme: themeName(color.name),
+                    type: "PAINT",
                 };
                 if (style.name && style.key && style.theme && style.type) {
                     collectedStyleData.push(style);
                 }
                 else {
-                    figma.notify('Error adding theme');
+                    figma.notify("Error adding theme");
                     throw new Error("Error adding theme");
                 }
             });
         }
         else {
-            figma.notify('There are no color styles in the document');
+            figma.notify("There are no color styles in the document");
         }
     }
-    else if (type === 'text') {
+    else if (type === "text") {
         let textStyles = figma.getLocalTextStyles();
         if (textStyles) {
-            textStyles.forEach(text => {
+            textStyles.forEach((text) => {
                 let style = {
-                    'name': styleName(text.name),
-                    'key': text.key,
-                    'theme': themeName(text.name),
-                    'type': 'TEXT'
+                    name: styleName(text.name),
+                    key: text.key,
+                    theme: themeName(text.name),
+                    type: "TEXT",
                 };
                 if (style.name && style.key && style.theme && style.type) {
                     collectedStyleData.push(style);
                 }
                 else {
-                    figma.notify('Error adding theme');
+                    figma.notify("Error adding theme");
                     throw new Error("Error adding theme");
                 }
             });
         }
         else {
-            figma.notify('There are no text styles in the document');
+            figma.notify("There are no text styles in the document");
         }
     }
-    else if (type === 'effect') {
+    else if (type === "effect") {
         let effectStyles = figma.getLocalEffectStyles();
         if (effectStyles) {
-            effectStyles.forEach(effect => {
+            effectStyles.forEach((effect) => {
                 let style = {
-                    'name': styleName(effect.name),
-                    'key': effect.key,
-                    'theme': themeName(effect.name),
-                    'type': 'EFFECT'
+                    name: styleName(effect.name),
+                    key: effect.key,
+                    theme: themeName(effect.name),
+                    type: "EFFECT",
                 };
                 if (style.name && style.key && style.theme && style.type) {
                     collectedStyleData.push(style);
                 }
                 else {
-                    figma.notify('Error adding theme');
+                    figma.notify("Error adding theme");
                     throw new Error("Error adding theme");
                 }
             });
         }
         else {
-            figma.notify('There are no effect styles in the document');
+            figma.notify("There are no effect styles in the document");
         }
     }
 }
-// grab color styles
 function collectColorStyles(node) {
     // check for children on note, if they exist, run them through this function
     // this will help us walk the tree to the bottom most level
     if (node.children) {
-        node.children.forEach(child => {
+        node.children.forEach((child) => {
             collectColorStyles(child);
         });
     }
     //here is where we grab all of the styles if they exist on the node
-    if (node.type === 'COMPONENT' || 'INSTANCE' || 'FRAME' || 'GROUP') {
+    if (node.type === "COMPONENT" || "INSTANCE" || "FRAME" || "GROUP") {
         if (node.backgroundStyleId) {
             let objectStyle = figma.getStyleById(node.backgroundStyleId);
             // key will only be available for remote styles
             if (objectStyle.key) {
                 let style = {
-                    'name': styleName(objectStyle.name),
-                    'key': objectStyle.key,
-                    'theme': themeName(objectStyle.name),
-                    'type': 'PAINT'
+                    name: styleName(objectStyle.name),
+                    key: objectStyle.key,
+                    theme: themeName(objectStyle.name),
+                    type: "PAINT",
                 };
                 if (style.name && style.key && style.theme && style.type) {
                     collectedStyleData.push(style);
                 }
                 else {
-                    figma.notify('Error adding theme');
+                    figma.notify("Error adding theme");
                     throw new Error("Error adding theme");
                 }
             }
         }
     }
-    if (node.type === 'RECTANGLE' || 'POLYGON' || 'ELLIPSE' || 'STAR' || 'TEXT' || 'VECTOR' || 'BOOLEAN_OPERATION' || 'LINE') {
+    if (node.type === "RECTANGLE" ||
+        "POLYGON" ||
+        "ELLIPSE" ||
+        "STAR" ||
+        "TEXT" ||
+        "VECTOR" ||
+        "BOOLEAN_OPERATION" ||
+        "LINE") {
         if (node.fillStyleId) {
             let objectStyle = figma.getStyleById(node.fillStyleId);
             // key will only be available for remote styles
             if (objectStyle.key) {
                 let style = {
-                    'name': styleName(objectStyle.name),
-                    'key': objectStyle.key,
-                    'theme': themeName(objectStyle.name),
-                    'type': 'PAINT'
+                    name: styleName(objectStyle.name),
+                    key: objectStyle.key,
+                    theme: themeName(objectStyle.name),
+                    type: "PAINT",
                 };
                 if (style.name && style.key && style.theme && style.type) {
                     collectedStyleData.push(style);
                 }
                 else {
-                    figma.notify('Error adding theme');
+                    figma.notify("Error adding theme");
                     throw new Error("Error adding theme");
                 }
             }
@@ -322,55 +320,53 @@ function collectColorStyles(node) {
             // key will only be available for remote styles
             if (objectStyle.key) {
                 let style = {
-                    'name': styleName(objectStyle.name),
-                    'key': objectStyle.key,
-                    'theme': themeName(objectStyle.name),
-                    'type': 'PAINT'
+                    name: styleName(objectStyle.name),
+                    key: objectStyle.key,
+                    theme: themeName(objectStyle.name),
+                    type: "PAINT",
                 };
                 if (style.name && style.key && style.theme && style.type) {
                     collectedStyleData.push(style);
                 }
                 else {
-                    figma.notify('Error adding theme');
+                    figma.notify("Error adding theme");
                     return;
                 }
             }
         }
     }
 }
-// grab text styles
 function collectTextStyles(node) {
     // check for children on note, if they exist, run them through this function
     // this will help us walk the tree to the bottom most level
     if (node.children) {
-        node.children.forEach(child => {
+        node.children.forEach((child) => {
             collectTextStyles(child);
         });
     }
-    if (node.type === 'TEXT' && node.textStyleId != 'MIXED' && node.textStyleId) {
+    if (node.type === "TEXT" && node.textStyleId != "MIXED" && node.textStyleId) {
         let objectStyle = figma.getStyleById(node.textStyleId);
         // key will only be available for remote styles
         if (objectStyle.key) {
             let style = {
-                'name': styleName(objectStyle.name),
-                'key': objectStyle.key,
-                'theme': themeName(objectStyle.name),
-                'type': 'TEXT'
+                name: styleName(objectStyle.name),
+                key: objectStyle.key,
+                theme: themeName(objectStyle.name),
+                type: "TEXT",
             };
             if (style.name && style.key && style.theme && style.type) {
                 collectedStyleData.push(style);
             }
             else {
-                figma.notify('Error adding theme');
+                figma.notify("Error adding theme");
                 throw new Error("Error adding theme");
             }
         }
     }
 }
-// grab effect styles
 function collectEffectStyles(node) {
     if (node.children) {
-        node.children.forEach(child => {
+        node.children.forEach((child) => {
             collectEffectStyles(child);
         });
     }
@@ -379,44 +375,42 @@ function collectEffectStyles(node) {
         // key will only be available for remote styles
         if (objectStyle.key) {
             let style = {
-                'name': styleName(objectStyle.name),
-                'key': objectStyle.key,
-                'theme': themeName(objectStyle.name),
-                'type': 'TEXT'
+                name: styleName(objectStyle.name),
+                key: objectStyle.key,
+                theme: themeName(objectStyle.name),
+                type: "TEXT",
             };
             if (style.name && style.key && style.theme && style.type) {
                 collectedStyleData.push(style);
             }
             else {
-                figma.notify('Error adding theme');
+                figma.notify("Error adding theme");
                 throw new Error("Error adding theme");
             }
         }
     }
 }
-// data passback to UI for posting to JSON Bin
 function sendNewThemeDataToUI() {
     if (cleanedStyleData) {
         figma.ui.postMessage({
-            'type': 'addNewTheme',
-            'themeCount': newThemeCount,
-            'themeData': JSON.stringify(newJsonBinData)
+            type: "addNewTheme",
+            themeCount: newThemeCount,
+            themeData: JSON.stringify(newJsonBinData),
         });
     }
     else {
-        figma.notify('There are no styles to create a theme from');
+        figma.notify("There are no styles to create a theme from");
         return;
     }
 }
-// get theme name
 function themeName(name) {
     if (usePrefixes) {
-        if (name.includes('/')) {
-            let prefix = name.split('/');
+        if (name.includes("/")) {
+            let prefix = name.split("/");
             return prefix[0];
         }
         else {
-            figma.notify('Styles names must be prefixed. Ex: themeName/colorName');
+            figma.notify("Styles names must be prefixed. Ex: themeName/colorName");
         }
     }
     else {
@@ -425,62 +419,57 @@ function themeName(name) {
 }
 function styleName(name) {
     if (usePrefixes) {
-        if (name.includes('/')) {
-            let styleName = name.split('/').slice(1).join('.');
+        if (name.includes("/")) {
+            let styleName = name.split("/").slice(1).join(".");
             return styleName;
         }
         else {
-            figma.notify('Styles names must be prefixed. Ex: themeName/colorName');
+            figma.notify("Styles names must be prefixed. Ex: themeName/colorName");
         }
     }
     else {
         return name;
     }
 }
-// count number of themes being added
 function countNewThemes() {
-    let themes = [...new Set(cleanedStyleData.map(style => style.theme))];
+    let themes = [...new Set(cleanedStyleData.map((style) => style.theme))];
     newThemeCount = themes.length;
 }
-// clean existing data from style creation process to make sure arrays are empty
 function clearStyleData() {
     collectedStyleData = [];
     cleanedStyleData = [];
     newJsonBinData = [];
 }
-// merge theme data
-// this function will merge the collected data 
-// with the existing theme data
 function mergeNewThemesWithExisting() {
-    cleanedStyleData = removeDuplicatesBy(style => style.key, collectedStyleData);
+    cleanedStyleData = removeDuplicatesBy((style) => style.key, collectedStyleData);
     if (cleanedStyleData) {
         if (existingThemeCount === 0) {
-            cleanedStyleData.forEach(style => {
+            cleanedStyleData.forEach((style) => {
                 newJsonBinData.push(style);
             });
         }
         else {
-            jsonBinData.forEach(style => {
+            jsonBinData.forEach((style) => {
                 newJsonBinData.push(style);
             });
-            cleanedStyleData.forEach(style => {
+            cleanedStyleData.forEach((style) => {
                 newJsonBinData.push(style);
             });
         }
     }
     else {
-        figma.notify('Something went wrong while processing your theme data');
+        figma.notify("Something went wrong while processing your theme data");
     }
 }
 // APPLY THEME
 function applyTheme(applyTo) {
     let nodes;
-    if (applyTo === 'selection') {
+    if (applyTo === "selection") {
         if (figma.currentPage.selection) {
             nodes = figma.currentPage.selection;
         }
         else {
-            figma.notify('Please make a selection');
+            figma.notify("Please make a selection");
         }
     }
     else {
@@ -488,51 +477,55 @@ function applyTheme(applyTo) {
             nodes = figma.currentPage.children;
         }
         else {
-            figma.notify('Please make a selection');
+            figma.notify("Please make a selection");
         }
     }
     if (nodes) {
-        figma.notify('Applying theme...', { timeout: 1000 });
-        let colorStyles = [...new Set(jsonBinData.map(style => style.theme === selectedTheme && style.type === 'PAINT'))];
-        let textStyles = [...new Set(jsonBinData.map(style => style.theme === selectedTheme && style.type === 'TEXT'))];
-        let effectStyles = [...new Set(jsonBinData.map(style => style.theme === selectedTheme && style.type === 'EFFECT'))];
+        figma.notify("Applying theme...", { timeout: 1000 });
+        let colorStyles = [
+            ...new Set(jsonBinData.map((style) => style.theme === selectedTheme && style.type === "PAINT")),
+        ];
+        let textStyles = [
+            ...new Set(jsonBinData.map((style) => style.theme === selectedTheme && style.type === "TEXT")),
+        ];
+        let effectStyles = [
+            ...new Set(jsonBinData.map((style) => style.theme === selectedTheme && style.type === "EFFECT")),
+        ];
         //if the theme contains color styles
         //iterate through all nodes to find color styles that match
         if (colorStyles) {
-            nodes.forEach(node => {
+            nodes.forEach((node) => {
                 applyColor(node);
             });
         }
         //if the theme contains text styles
         //iterate through all nodes to find text styles that match
         if (textStyles) {
-            nodes.forEach(node => {
+            nodes.forEach((node) => {
                 applyText(node);
             });
         }
         //if the theme contains effect styles
         //iterate through all nodes to find effect styles that match
         if (effectStyles) {
-            nodes.forEach(node => {
+            nodes.forEach((node) => {
                 applyEffect(node);
             });
         }
     }
     else {
-        figma.notify('There is nothing to apply styles to');
+        figma.notify("There is nothing to apply styles to");
     }
 }
-// this function will loop through every node and apply a matching color style if found
-// it will ignore any layer without a fill, background, or stroke style applied
 function applyColor(node) {
     //iterate through children if the node has them
     if (node.children) {
-        node.children.forEach(child => {
+        node.children.forEach((child) => {
             applyColor(child);
         });
     }
     //handle background fills
-    if (node.type === 'COMPONENT' || 'INSTANCE' || 'FRAME' || 'GROUP') {
+    if (node.type === "COMPONENT" || "INSTANCE" || "FRAME" || "GROUP") {
         if (node.backgroundStyleId) {
             (function () {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -540,7 +533,7 @@ function applyColor(node) {
                     if (style.key) {
                         let newStyleKey = findMatchInSelectedTheme(style.key);
                         if (newStyleKey) {
-                            let newStyle = yield figma.importStyleByKeyAsync(newStyleKey);
+                            let newStyle = (yield figma.importStyleByKeyAsync(newStyleKey));
                             if (newStyle) {
                                 node.backgroundStyleId = newStyle.id;
                             }
@@ -551,7 +544,14 @@ function applyColor(node) {
         }
     }
     //handle fills + strokes
-    if (node.type === 'RECTANGLE' || 'POLYGON' || 'ELLIPSE' || 'STAR' || 'TEXT' || 'VECTOR' || 'BOOLEAN_OPERATION' || 'LINE') {
+    if (node.type === "RECTANGLE" ||
+        "POLYGON" ||
+        "ELLIPSE" ||
+        "STAR" ||
+        "TEXT" ||
+        "VECTOR" ||
+        "BOOLEAN_OPERATION" ||
+        "LINE") {
         //fills
         if (node.fillStyleId) {
             (function () {
@@ -560,7 +560,7 @@ function applyColor(node) {
                     if (style.key) {
                         let newStyleKey = findMatchInSelectedTheme(style.key);
                         if (newStyleKey) {
-                            let newStyle = yield figma.importStyleByKeyAsync(newStyleKey);
+                            let newStyle = (yield figma.importStyleByKeyAsync(newStyleKey));
                             if (newStyle) {
                                 node.fillStyleId = newStyle.id;
                             }
@@ -577,7 +577,7 @@ function applyColor(node) {
                     if (style.key) {
                         let newStyleKey = findMatchInSelectedTheme(style.key);
                         if (newStyleKey) {
-                            let newStyle = yield figma.importStyleByKeyAsync(newStyleKey);
+                            let newStyle = (yield figma.importStyleByKeyAsync(newStyleKey));
                             if (newStyle) {
                                 node.strokeStyleId = newStyle.id;
                             }
@@ -588,30 +588,29 @@ function applyColor(node) {
         }
     }
 }
-//apply text styles
 function applyText(node) {
     //iterate through children if the node has them
     if (node.children) {
-        node.children.forEach(child => {
+        node.children.forEach((child) => {
             applyText(child);
         });
     }
     // apply text styles
-    if (node.type === 'TEXT') {
+    if (node.type === "TEXT") {
         if (node.textStyleId) {
-            if (typeof node.textStyleId !== 'symbol') {
+            if (typeof node.textStyleId !== "symbol") {
                 (function () {
                     return __awaiter(this, void 0, void 0, function* () {
                         let style = figma.getStyleById(node.textStyleId);
                         if (style.key) {
                             let newStyleKey = findMatchInSelectedTheme(style.key);
                             if (newStyleKey) {
-                                let newStyle = yield figma.importStyleByKeyAsync(newStyleKey);
+                                let newStyle = (yield figma.importStyleByKeyAsync(newStyleKey));
                                 let fontFamily = newStyle.fontName.family;
                                 let fontStyle = newStyle.fontName.style;
                                 yield figma.loadFontAsync({
-                                    'family': fontFamily,
-                                    'style': fontStyle
+                                    family: fontFamily,
+                                    style: fontStyle,
                                 });
                                 if (newStyle) {
                                     node.textStyleId = newStyle.id;
@@ -622,21 +621,31 @@ function applyText(node) {
                 })();
             }
             else {
-                figma.notify('Note: Themer currently skips text objects with multiple text styles applied.');
+                figma.notify("Note: Themer currently skips text objects with multiple text styles applied.");
             }
         }
     }
 }
-//apply effect styles
 function applyEffect(node) {
     //iterate through children if the node has them
     if (node.children) {
-        node.children.forEach(child => {
+        node.children.forEach((child) => {
             applyEffect(child);
         });
     }
     //apply effects
-    if (node.type === 'COMPONENT' || 'INSTANCE' || 'FRAME' || 'GROUP' || 'RECTANGLE' || 'POLYGON' || 'ELLIPSE' || 'STAR' || 'TEXT' || 'VECTOR' || 'BOOLEAN_OPERATION' || 'LINE') {
+    if (node.type === "COMPONENT" ||
+        "INSTANCE" ||
+        "FRAME" ||
+        "GROUP" ||
+        "RECTANGLE" ||
+        "POLYGON" ||
+        "ELLIPSE" ||
+        "STAR" ||
+        "TEXT" ||
+        "VECTOR" ||
+        "BOOLEAN_OPERATION" ||
+        "LINE") {
         if (node.effectStyleId) {
             (function () {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -656,17 +665,16 @@ function applyEffect(node) {
     }
 }
 // HELPER FUNCTIONS
-//find matching styles based
 function findMatchInSelectedTheme(styleKey) {
     // this gets item in the array which matches the current style applied
-    let currentStyle = jsonBinData.find(style => style.key === styleKey);
+    let currentStyle = jsonBinData.find((style) => style.key === styleKey);
     // if we find a matching style execute this
     if (currentStyle) {
         //this gets the name of the current style
         //we need the name of the current style so we can search the jsonbin array
         //for matches with the selected theme
         let name = currentStyle.name;
-        let matchedStyle = jsonBinData.find(style => style.name === name && style.theme === selectedTheme);
+        let matchedStyle = jsonBinData.find((style) => style.name === name && style.theme === selectedTheme);
         if (matchedStyle) {
             //if we find a match in the selected theme, we will return the style key
             // so that we can import the style into the doc
@@ -674,7 +682,6 @@ function findMatchInSelectedTheme(styleKey) {
         }
     }
 }
-// populate latest data from API
 function updatedDataFromAPI(data) {
     clearStyleData();
     //this passes the data sent from API -> UI -> jsonBinData var
@@ -688,19 +695,17 @@ function updatedDataFromAPI(data) {
         existingThemeCount = 0;
     }
 }
-// update credentials
 function updateCredentials(secret, url) {
     (() => __awaiter(this, void 0, void 0, function* () {
         try {
-            yield figma.clientStorage.setAsync('apiSecret', secret);
-            yield figma.clientStorage.setAsync('apiURL', url);
+            yield figma.clientStorage.setAsync("apiSecret", secret);
+            yield figma.clientStorage.setAsync("apiURL", url);
         }
         catch (err) {
-            figma.notify('There was an issue saving your credentials. Please try again.');
+            figma.notify("There was an issue saving your credentials. Please try again.");
         }
     }))();
 }
-//remove styles with duplicate keys from themes
 function removeDuplicatesBy(keyFn, array) {
     var mySet = new Set();
     return array.filter(function (x) {

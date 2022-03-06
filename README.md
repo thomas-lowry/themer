@@ -9,5 +9,6 @@
 ## 🎯 Roadmap
 
 - Update `jsonbin` api to v3
+- Better typing
 - Migrate to Svelte or React
 - Add alternative to JSONBin  
