@@ -2,7 +2,7 @@
   "name": "themer-next",
   "id": "1082336455256938003",
   "api": "1.0.0",
-  "main": "code.js",
+  "main": "figma.js",
   "editorType": ["figma"],
   "ui": "ui.html"
 }

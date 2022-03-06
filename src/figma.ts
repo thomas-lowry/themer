@@ -51,7 +51,6 @@ async function init() {
 }
 init();
 
-//MESSAGING TO PLUGIN UI
 figma.ui.onmessage = async (msg) => {
   switch (msg.type) {
     case "notify":

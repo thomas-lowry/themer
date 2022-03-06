@@ -2,17 +2,38 @@
   "name": "themer-next",
   "version": "1.0.0",
   "description": "A Figma plugin designed to allow you to swap between styles named the same from different published libraries.",
-  "main": "code.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "start": "sirv public --no-clear",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "contributors": [
     "Florian Sénat <florian.senat@protonmail.com>",
     "Tom Lowry (https://github.com/thomas-lowry)"
   ],
-  "license": "",
+  "dependencies": {
+    "sirv-cli": "^2.0.0"
+  },
   "devDependencies": {
     "@figma/plugin-typings": "*",
-    "typescript": "*"
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-typescript": "^8.0.0",
+    "@tsconfig/svelte": "^2.0.0",
+    "cssnano": "^5.1.0",
+    "postcss": "^8.4.7",
+    "rollup": "^2.3.4",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-html-bundle": "^0.0.3",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "svelte": "^3.0.0",
+    "svelte-check": "^2.0.0",
+    "svelte-preprocess": "^4.0.0",
+    "tslib": "^2.0.0",
+    "typescript": "^4.0.0"
   }
 }
