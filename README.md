@@ -10,4 +10,4 @@
 
 - Update `jsonbin` api to v3
 - Migrate to Svelte or React
-- Add alternative to JSONBin 
+- Add alternative to JSONBin  
