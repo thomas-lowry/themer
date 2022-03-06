@@ -9,4 +9,4 @@
 ## 🎯 Roadmap
 
 - Update `jsonbin` api to v3
-- Refactor code to have better performances
+- Migrate to Svelte or React
