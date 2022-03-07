@@ -1,5 +1,4 @@
-let apiSecret: string;
-let apiURL: string;
+import { manageCredentials } from "./libs/credentials";
 
 // THEME DATA VARS
 // this is the latest data from JSON Bin,
@@ -24,34 +23,14 @@ let newThemeCount = 0;
 let existingThemeCount: number;
 let selectedTheme: string;
 
-figma.showUI(__html__, { width: 240, height: 312 });
+figma.showUI(__html__, { width: 300, height: 324 });
 
-async function init() {
-  try {
-    apiURL = await figma.clientStorage.getAsync("apiURL");
-    apiSecret = await figma.clientStorage.getAsync("apiSecret");
-
-    if (apiURL && apiSecret) {
-      figma.ui.postMessage({
-        type: "apiCredentials",
-        status: true,
-        url: apiURL,
-        secret: apiSecret,
-      });
-    } else {
-      figma.ui.postMessage({
-        type: "apiCredentials",
-        status: false,
-      });
-    }
-  } catch (err) {
-    figma.closePlugin("An error occured while initializing the plugin.");
+figma.ui.onmessage = (msg) => {
+  if (msg.type.includes("credentials")) {
+    manageCredentials(msg.type);
     return;
   }
-}
-init();
 
-figma.ui.onmessage = async (msg) => {
   switch (msg.type) {
     case "notify":
       figma.notify(msg.msg, { timeout: 1500 });
@@ -81,25 +60,25 @@ figma.ui.onmessage = async (msg) => {
       updatedDataFromAPI(msg.themeData);
       break;
 
-    case "reset":
-      resetThemer();
-      break;
+    // case "reset":
+    //   resetThemer();
+    //   break;
   }
 };
 
-function resetThemer() {
-  (async () => {
-    try {
-      await figma.clientStorage.setAsync("apiSecret", "");
-      await figma.clientStorage.setAsync("apiURL", "");
-    } catch (err) {
-      figma.notify(
-        "There was an issue saving your credentials. Please try again."
-      );
-    }
-  })();
-  figma.notify("Themer reset successfully");
-}
+// function resetThemer() {
+//   (async () => {
+//     try {
+//       await figma.clientStorage.setAsync("apiSecret", "");
+//       await figma.clientStorage.setAsync("apiURL", "");
+//     } catch (err) {
+//       figma.notify(
+//         "There was an issue saving your credentials. Please try again."
+//       );
+//     }
+//   })();
+//   figma.notify("Themer reset successfully");
+// }
 
 function createTheme(data) {
   // set prefixes setting

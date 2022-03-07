@@ -41,10 +41,22 @@ export default [
     input: "src/figma.ts",
     output: {
       file: "public/figma.js",
-      format: "cjs",
-      name: "code",
+      format: "iife",
+      name: "figma",
     },
-    plugins: [typescript(), commonjs(), production && terser()],
+    plugins: [
+      svelte({
+        preprocess: sveltePreprocess({ sourceMap: !production }),
+        compilerOptions: { dev: !production },
+      }),
+      resolve({
+        browser: true,
+        dedupe: ["svelte"],
+      }),
+      typescript(),
+      commonjs(),
+      production && terser(),
+    ],
   },
   {
     input: "src/app.ts",
@@ -56,10 +68,7 @@ export default [
     plugins: [
       svelte({
         preprocess: sveltePreprocess({ sourceMap: !production }),
-        compilerOptions: {
-          // enable run-time checks when not in production
-          dev: !production,
-        },
+        compilerOptions: { dev: !production },
       }),
       resolve({
         browser: true,
