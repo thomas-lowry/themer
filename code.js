@@ -34,7 +34,6 @@ function init() {
             apiURL = yield figma.clientStorage.getAsync("apiURL");
             apiSecret = yield figma.clientStorage.getAsync("apiSecret");
             if (apiURL && apiSecret) {
-                //send a message to the UI with the credentials storred in the client
                 figma.ui.postMessage({
                     type: "apiCredentials",
                     status: true,
