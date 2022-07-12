@@ -963,16 +963,16 @@ function initializeWithThemerData() {
 
 		//create a new bin
 		let xhr = new XMLHttpRequest();
-		xhr.open("POST", "https://api.jsonbin.io/b", true);
+		xhr.open("POST", "https://api.jsonbin.io/v3/b", true);
 		xhr.setRequestHeader("Access-Control-Allow-Credentials", true);
 		xhr.setRequestHeader("Content-type", "application/json");
-		xhr.setRequestHeader("secret-key", inputApiSecret.value);
+		xhr.setRequestHeader("X-Master-Key", inputApiSecret.value);
 		xhr.responseType = 'text';
 		xhr.onload = () => {
 			if (xhr.status >= 200 && xhr.status < 300) {
 
 				let response = JSON.parse(xhr.response);
-				inputApiURL.value = 'https://api.jsonbin.io/b/' + response.id;
+				inputApiURL.value = 'https://api.jsonbin.io/v3/b/' + response.metadata.id;
 				initializeWithThemerData();
 
 			} else {
@@ -992,6 +992,8 @@ function initializeWithThemerData() {
 
 	} else if (inputApiURL.value && inputApiSecret.value) {
 
+		inputApiURL.value = inputApiURL.value.replace("https://api.jsonbin.io/b","https://api.jsonbin.io/v3/b")
+
 		//send msg to plugin
 		parent.postMessage({pluginMessage: {
 			'type': 'notify',
@@ -1003,7 +1005,7 @@ function initializeWithThemerData() {
 		xhr.open('GET', inputApiURL.value, true);
 		xhr.setRequestHeader("Access-Control-Allow-Credentials", true);
 		xhr.setRequestHeader("content-type", "application/json");
-		xhr.setRequestHeader("secret-key", inputApiSecret.value);
+		xhr.setRequestHeader("X-Master-Key", inputApiSecret.value);
 		xhr.setRequestHeader("versioning", false);
 		xhr.responseType = 'text';
 		xhr.onload = () => {
@@ -1018,6 +1020,8 @@ function initializeWithThemerData() {
 
 				//populate latest data from API
 				jsonBinData = JSON.parse(xhr.response);
+
+				jsonBinData = jsonBinData.record;
 
 				//update admin state
 				adminValidation();
@@ -1059,7 +1063,7 @@ function initializeWithThemerData() {
 
 // populate list of themes
 function populateThemes() {
-	if(jsonBinData.length === 1 && jsonBinData[0].length === undefined) {
+	if(jsonBinData.length === 1 && jsonBinData[0].theme === undefined) {
 		//send msg to plugin
 		parent.postMessage({pluginMessage: {
 			'type': 'notify',
@@ -1408,17 +1412,13 @@ function addNewTheme(themeData, themeCount) {
 	//make xml http request
 	let xhr = new XMLHttpRequest();
 	xhr.open('PUT', inputApiURL.value, true);
-	xhr.setRequestHeader("Access-Control-Allow-Credentials", true);
-	xhr.setRequestHeader("content-type", "application/json");
-	xhr.setRequestHeader("secret-key", inputApiSecret.value);
-	xhr.setRequestHeader("versioning", false);
-	xhr.responseType = 'text';
+	xhr.setRequestHeader("Content-Type", "application/json");
+	xhr.setRequestHeader("X-Master-Key", inputApiSecret.value);
 	xhr.onload = () => {
 		if (xhr.status >= 200 && xhr.status < 300) {
 
 			//populate latest data from API
 			jsonBinData = JSON.parse(themeData);
-
 			let lang;
 			if (themeCount === 1) {
 				lang = 'theme';
@@ -1512,14 +1512,15 @@ deleteTheme.addEventListener('click', function(event) {
 	xhr.open('PUT', inputApiURL.value, true);
 	xhr.setRequestHeader("Access-Control-Allow-Credentials", true);
 	xhr.setRequestHeader("content-type", "application/json");
-	xhr.setRequestHeader("secret-key", inputApiSecret.value);
+	xhr.setRequestHeader("X-Master-Key", inputApiSecret.value);
 	xhr.setRequestHeader("versioning", false);
 	xhr.responseType = 'text';
 	xhr.onload = () => {
 		if (xhr.status >= 200 && xhr.status < 300) {
 
 			//populate latest data from API
-			jsonBinData = JSON.parse(xhr.responseText).data;
+			jsonBinData = JSON.parse(xhr.responseText);
+			jsonBinData = jsonBinData.record;
 
 			//send msg to plugin
 			parent.postMessage({pluginMessage: {

@@ -1,9 +1,10 @@
 // VARS
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -50,9 +51,14 @@ var __read = (this && this.__read) || function (o, n) {
     }
     return ar;
 };
-var __spread = (this && this.__spread) || function () {
-    for (var ar = [], i = 0; i < arguments.length; i++) ar = ar.concat(__read(arguments[i]));
-    return ar;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 var _this = this;
 // API credentials
@@ -95,6 +101,11 @@ figma.showUI(__html__, { width: 240, height: 312 });
             case 2:
                 apiSecret = _a.sent();
                 if (apiURL && apiSecret) {
+                    //add logic to see if using the old api
+                    //rewrite the url to the new
+                    //ref: old format https://api.jsonbin.io/b/6285096d25069545a33c28d5
+                    //clientStorage.setAsync new data
+                    apiURL = apiURL.replace("https://api.jsonbin.io/b", "https://api.jsonbin.io/v3/b");
                     //send a message to the UI with the credentials storred in the client
                     figma.ui.postMessage({
                         'type': 'apiCredentials',
@@ -513,7 +524,7 @@ function styleName(name) {
 }
 // count number of themes being added
 function countNewThemes() {
-    var themes = __spread(new Set(cleanedStyleData.map(function (style) { return style.theme; })));
+    var themes = __spreadArray([], __read(new Set(cleanedStyleData.map(function (style) { return style.theme; }))), false);
     newThemeCount = themes.length;
 }
 // clean existing data from style creation process to make sure arrays are empty
@@ -567,9 +578,9 @@ function applyTheme(applyTo) {
     }
     if (nodes) {
         figma.notify('Applying theme...', { timeout: 1000 });
-        var colorStyles = __spread(new Set(jsonBinData.map(function (style) { return style.theme === selectedTheme && style.type === 'PAINT'; })));
-        var textStyles = __spread(new Set(jsonBinData.map(function (style) { return style.theme === selectedTheme && style.type === 'TEXT'; })));
-        var effectStyles = __spread(new Set(jsonBinData.map(function (style) { return style.theme === selectedTheme && style.type === 'EFFECT'; })));
+        var colorStyles = __spreadArray([], __read(new Set(jsonBinData.map(function (style) { return style.theme === selectedTheme && style.type === 'PAINT'; }))), false);
+        var textStyles = __spreadArray([], __read(new Set(jsonBinData.map(function (style) { return style.theme === selectedTheme && style.type === 'TEXT'; }))), false);
+        var effectStyles = __spreadArray([], __read(new Set(jsonBinData.map(function (style) { return style.theme === selectedTheme && style.type === 'EFFECT'; }))), false);
         //if the theme contains color styles
         //iterate through all nodes to find color styles that match
         if (colorStyles) {
@@ -799,7 +810,6 @@ function updatedDataFromAPI(data) {
     // if there is, we will append subsequent themes to the data
     // if its the first theme, we want to overwrite the same content
     // that was required to to create an empty bin
-    console.log(jsonBinData);
     if (jsonBinData[0].theme === undefined) {
         existingThemeCount = 0;
     }
@@ -813,6 +823,7 @@ function updateCredentials(secret, url) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
+                    url = url.replace("https://api.jsonbin.io/b", "https://api.jsonbin.io/v3/b");
                     return [4 /*yield*/, figma.clientStorage.setAsync('apiSecret', secret)];
                 case 1:
                     _a.sent();

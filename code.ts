@@ -42,8 +42,18 @@ figma.showUI(__html__, {width: 240, height: 312 });
 	try {
 		apiURL = await figma.clientStorage.getAsync('apiURL');
         apiSecret = await figma.clientStorage.getAsync('apiSecret');
-		    
+		
+
 		if (apiURL && apiSecret) {
+
+            //add logic to see if using the old api
+            //rewrite the url to the new
+            //ref: old format https://api.jsonbin.io/b/6285096d25069545a33c28d5
+            //clientStorage.setAsync new data
+            
+            apiURL = apiURL.replace("https://api.jsonbin.io/b","https://api.jsonbin.io/v3/b")
+            
+
 			//send a message to the UI with the credentials storred in the client
 			figma.ui.postMessage({
 				'type': 'apiCredentials',
@@ -720,7 +730,6 @@ function updatedDataFromAPI(data) {
     // if there is, we will append subsequent themes to the data
     // if its the first theme, we want to overwrite the same content
     // that was required to to create an empty bin
-    console.log(jsonBinData);
 
     if (jsonBinData[0].theme === undefined) {
         existingThemeCount = 0;
@@ -731,6 +740,9 @@ function updatedDataFromAPI(data) {
 function updateCredentials(secret, url) {
     (async () => {
         try {
+
+            url = url.replace("https://api.jsonbin.io/b","https://api.jsonbin.io/v3/b")
+
             await figma.clientStorage.setAsync('apiSecret', secret);
             await figma.clientStorage.setAsync('apiURL', url);
         } catch (err) {
