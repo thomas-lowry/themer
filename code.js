@@ -501,7 +501,8 @@ function themeName(name) {
             return prefix[0];
         }
         else {
-            figma.notify('Styles names must be prefixed. Ex: themeName/colorName');
+            var notifiyText = 'Could not handle:\'' + name + '\' - Styles names must be prefixed. Ex: themeName/colorName';
+            figma.notify(notifiyText);
         }
     }
     else {
@@ -515,7 +516,8 @@ function styleName(name) {
             return styleName_1;
         }
         else {
-            figma.notify('Styles names must be prefixed. Ex: themeName/colorName');
+            var notifiyText = 'Could not handle:\'' + name + '\' - Styles names must be prefixed. Ex: themeName/colorName';
+            figma.notify(notifiyText);
         }
     }
     else {
@@ -561,7 +563,7 @@ function mergeNewThemesWithExisting() {
 function applyTheme(applyTo) {
     var nodes;
     if (applyTo === 'selection') {
-        if (figma.currentPage.selection) {
+        if (checkFigmaSelection()) {
             nodes = figma.currentPage.selection;
         }
         else {
@@ -849,4 +851,8 @@ function removeDuplicatesBy(keyFn, array) {
             mySet.add(key);
         return isNew;
     });
+}
+// check if there is currently an selection in figma
+function checkFigmaSelection() {
+    return figma.currentPage.selection && figma.currentPage.selection.length > 0;
 }
