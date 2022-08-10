@@ -13,7 +13,6 @@ export async function getLocalStyles(styleTypes) {
     //some styles are published, this doesn't seem good, tell the user, stay at step 2
     //none of the styles are published, continue to step 3, but tell the user
 
-
     let styles:BaseStyle[] = [];
 
     //get color styles
@@ -40,13 +39,16 @@ export async function getLocalStyles(styleTypes) {
         }
     }
 
+    let cleanedStyleData = assembleStylesArray(styles);
+    console.log('cleaned: ', cleanedStyleData);
+
     //determine if ALL, SOME, or NONE of the styles are published
-    let publishedStatus = await isPublished(styles);
+    let publishedStatus = await isPublished(cleanedStyleData);
 
     //send the data back to the UI
     figma.ui.postMessage({
         'type': 'createStyleData',
-        'styles': assembleStylesArray(styles),
+        'styles': cleanedStyleData,
         'publishedStatus': publishedStatus
     });
 

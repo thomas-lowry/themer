@@ -21,6 +21,7 @@ export const winWidth = writable(windowWidth());
 export const winHeight = writable(windowHeight());
 
 //capture where to pull styles from
+//this is set to local since by default, themer will try to create themes from local styles vs. a selection
 export const styleSource = writable('local');
 
 //capture which type of styles to include

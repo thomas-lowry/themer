@@ -6,6 +6,7 @@
     import { step, styleSource, styleTypeColor, styleTypeText, styleTypeEffect, winWidth, createThemeUI, loading, themes } from '../scripts/stores.js';
 
     //var to store the raw style data we get back from Figma before processing it into theme data to store in JSON BIn
+    //the UI will need to populate the "theme" property of each object depending on what the user decides
     let rawStyleData;
 
     //number of steps in the create theme process, easy to add more later
@@ -37,6 +38,7 @@
     //if enabled, will update the placeholder text when the field is disabled
     function themeNameInput() {
         if (prefixedStyleNames === true) {
+            newThemeName = '';
             themeNamePlaceholder = uniqueThemeNamesFromPrefixes.join(', ');
         } else {
             themeNamePlaceholder = "Unique theme name";
@@ -154,7 +156,7 @@
             effect: $styleTypeEffect
         }
 
-        //display loading state
+        //display loading state while we wait for the data to be retrieved
         $loading = true;
 
         //send message to plugin api
@@ -166,38 +168,121 @@
     //This function will run when the UI recieves data about the available styles back from the plugin code
     function validateStyleData(styles, publishedStatus) {
 
-
-        //first we need to get the style data and populate a local var
         rawStyleData = styles;
 
-        //determine if prefixes are present
-        //if they are, put the prefix only into a new array
-        //if there is a duplicate, don't push it
-        //this way we can use the length of the array to determine amount of unqiue themes that will be created
-        styles.forEach(style => {
-            if (style.name.includes('/')) {
-                let prefix = style.name.split('/');
-                if (!uniqueThemeNamesFromPrefixes.some(themePrefix => themePrefix === prefix[0])) {
-                    uniqueThemeNamesFromPrefixes.push(prefix[0]);
-                }
+        //first, we check if there are any styles
+        //if there are none, there is no point in proceeding to step 3
+        //tell the user by passing a msg back to the plugin
+        //return to step 2
+        if (styles.length === 0) {
+
+            let errorMsg;
+            
+            //customize error message based type the source of styles selected
+            if ($styleSource === 'local') {
+                errorMsg = 'There are no local styles in this document';
+            } else if ($styleSource === 'selection') {
+                errorMsg = 'There are no styles in the selection';
+            } else {
+                errorMsg = 'There are no styles on the current page';
             }
-        });
 
-        if (uniqueThemeNamesFromPrefixes[0].length >= 1) {
-            prefixedNamesUnavailable = false;
+            //tell the user there are no styles
+            //add a slight 1s delay before disabling the loading state so it does not feel jarring
+            setTimeout(() => {
+                parent.postMessage({ pluginMessage: { 'type': 'error', 'errorMsg': errorMsg } }, '*');
+                $loading = false;
+            }, 1000);
+
+            //revert to step 2
+            $step = 2;
+
+        } else if(publishedStatus != 'all') {
+
+            let errorMsg;
+
+            //customize error message based on published status
+            if (publishedStatus === 'some') {
+                errorMsg = 'Some styles are not published. Publish them to continue.'
+            } else {
+                errorMsg = 'None of the styles are published. Publish them to continue.'
+            }
+
+            //tell the user that the styles need to be published
+            //add a slight 1s delay before disabling the loading state so it does not feel jarring
+            setTimeout(() => {
+                parent.postMessage({ pluginMessage: { 'type': 'error', 'errorMsg': errorMsg } }, '*');
+                $loading = false;
+            }, 1000);
+
+            //revert to step 2
+            $step = 2;
+
         } else {
-            prefixedNamesUnavailable = true;
+
+            //first we need to get the style data and populate a local var
+            //we will use this later outside of this function to prepare final data to send to jsonbin
+            rawStyleData = styles;
+
+            //create a scoped variable with the theme data returned from Figma
+            //we'll modify this to pre-populate the theme property
+            //this will help us determine prefixed theme splitting eligibility
+            let preValidationThemeData = styles;
+
+            //determine if prefixes are present
+            //if they are, put the prefix only into a new array
+            //if there is a duplicate, don't push it
+            //this way we can use the length of the array to determine amount of unqiue themes that will be created
+            preValidationThemeData.forEach(style => {
+                if (style.name.includes('/')) {
+                    let prefix = style.name.split('/');
+                    if (!uniqueThemeNamesFromPrefixes.some(themePrefix => themePrefix === prefix[0])) {
+                        uniqueThemeNamesFromPrefixes.push(prefix[0]);
+                        style.theme = prefix[0];
+                    } else {
+                        style.theme = prefix[0];
+                    }
+                }
+            });
+
+
+            //this will determine whether or not we enable the checkbox to split up prefixed theme names
+            //if all styles have a corresponding theme, show it
+            //if they do not, keep this option disabled
+            if (uniqueThemeNamesFromPrefixes.length >= 2) {
+
+                //iterate through all styles in the array
+                //if there are items with names which do not have prefixes
+                //increase the count
+                let numOfThemelessItems = 0;
+                preValidationThemeData.forEach(style => {
+                    if (style.theme === '') {
+                        numOfThemelessItems++;
+                    }
+                })
+
+                //if all styles have an associated theme, we can enable this option
+                //if there are outliers, we just allow the user to specify their own theme name
+                //keeping the checkbox disabled
+                if (numOfThemelessItems === 0) {
+                    prefixedNamesUnavailable = false;
+                } else {
+                    prefixedNamesUnavailable = true;
+                }
+
+            } else {
+                prefixedNamesUnavailable = true;
+            }
+
+            //advance to step 3
+            $step = 3;
+
+            //turn off the loading screen
+            setTimeout(function(){ 
+                $loading = false;
+            }, 1000);
+
         }
-
-        console.log(uniqueThemeNamesFromPrefixes.length);
-
-        //advance to step 3
-        $step = 3;
-
-        //turn off the loading screen
-        setTimeout(function(){ 
-            $loading = false;
-        }, 1000);
 
     }
 
@@ -250,7 +335,7 @@
 
             <!-- Step 2 -->
             <div class="content__step">
-                <Radio bind:group={$styleSource} value="local">Local styles (default)</Radio>
+                <Radio bind:group={$styleSource} value="local">Local styles</Radio>
                 <Radio bind:group={$styleSource} value="selection">Styles in current selection</Radio>
                 <Radio bind:group={$styleSource} value="page">Styles on current page</Radio>
             </div>

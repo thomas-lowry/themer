@@ -1,15 +1,25 @@
 export function assembleStylesArray(styles) {
-    let stylesArray:Array<Object> = [];
+    let reformatedArray = [];
 
+    console.log('pre reform:', styles);
+
+    //Reformat array
     styles.forEach(style => {
         let item = {
             name: style.name,
-            id: style.id,
             key: style.key,
+            id: style.id,
+            theme: '',
             type: style.type
         }
-        stylesArray.push(item);
-    })
+        reformatedArray.push(item);
+    });
 
-    return stylesArray
+    console.log('reform: ', reformatedArray);
+
+    //filter our duplicate entries
+    let keys = reformatedArray.map(o => o.key)
+    let filteredArray = reformatedArray.filter(({key}, index) => !keys.includes(key, index + 1))
+    
+    return filteredArray;
 }

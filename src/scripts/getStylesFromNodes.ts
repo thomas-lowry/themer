@@ -1,6 +1,7 @@
 //imports
 import { hasChildren } from "./hasChildren";
-import { removeDuplicatesBy } from "./removeDuplicatesBy";
+import { hasFills } from "./hasFills";
+import { hasEffects } from "./hasEffects";
 import { isPublished } from "./isPublished";
 import { assembleStylesArray } from "./assembleStylesArray";
 
@@ -8,142 +9,151 @@ let styles:BaseStyle[] = [];
 
 export async function getStylesFromNodes(nodes:SceneNode[], styleTypes) {
 
-    //collect all styles
-    nodes.forEach(node=> {
-        getStylesFromNode(node, styleTypes);
-    });
+        //styles = [];
 
-    //remove duplicate styles in the array
-    let cleanedStyleData = removeDuplicatesBy(style => style.key, styles);
+        console.log('nodes', nodes);
 
-    //determine if ALL, SOME, or NONE of the styles are published
-    let publishedStatus = await isPublished(styles);
+        if (nodes.length != 0) {
 
-    //send the data back to the UI
-    figma.ui.postMessage({
-        'type': 'createStyleData',
-        'styles': assembleStylesArray(styles),
-        'publishedStatus': publishedStatus
-    });
+            //this will loop over all nodes passed to the function
+            //it will past each node to a function to extract any styles
+            //if the node has children, it will pass the array of children back through the function
+            nodes.forEach(node=> {
+                getStylesFromNode(node, styleTypes);
+            });
+
+            let cleanedStyleData = assembleStylesArray(styles);
+            console.log('cleaned: ', cleanedStyleData);
+
+            //determine if ALL, SOME, or NONE of the styles are published
+            let publishedStatus = await isPublished(cleanedStyleData);
+
+            //send the data back to the UI
+            figma.ui.postMessage({
+                'type': 'createStyleData',
+                'styles': cleanedStyleData,
+                'publishedStatus': publishedStatus
+            });
+
+        } else {
+
+            console.log('is this firing?');
+
+            //send the data back to the UI with the empty array
+            figma.ui.postMessage({
+                'type': 'createStyleData',
+                'styles': nodes,
+                'publishedStatus': 'none'
+            });
+        }
 
 }
 
 
 
 //get all possible styles from the node
-function getStylesFromNode(node:SceneNode, styleTypes) {
+function getStylesFromNode(node, styleTypes) {
 
     //COLOR
     if(styleTypes.color) {
-        let colorStyles:PaintStyle[] = [];
 
-        //ignore these types of notes because they cannot have a fill style
-        //text nodes will be treated separately
-        if (node.type != 'SLICE' && node.type != 'GROUP') {
+        //check to see if node supports fills
+        if (hasFills(node)) {
 
-            //check for unique style when adding to array
-            let pushUniqueColor = (style: PaintStyle) => {
-                if (!colorStyles.some((item) => item.key === style.key)) {
-                    colorStyles.push(style)
-                }
-            }
+            //check to see if the node is text
+            //text nodes can contain multiple styles
+            if (node.type === 'TEXT') {
+                let uniqueTextColorStyles = node.getStyledTextSegments(['fillStyleId']);
 
-            if (node.type === 'TEXT' && typeof node.fillStyleId === 'symbol') {
+                if (uniqueTextColorStyles.length != 0) {
 
-                let length = node.characters.length
-                for (let i = 0; i < length; i++) {
-                    let styleId = node.getRangeFillStyleId(i, i + 1) as string;
-                    let style:PaintStyle;
-                    if (styleId != '' && styleId.length > 0) {
-                        style = figma.getStyleById(styleId) as PaintStyle;
-                    }
-                    pushUniqueColor(style);
+                    uniqueTextColorStyles.forEach(fillStyle => {
+
+                        let id = fillStyle.fillStyleId as string;
+                        let style = figma.getStyleById(id) as PaintStyle;
+
+                        //add style to the array
+                        styles.push(style);
+                        
+                    });
+
                 }
 
-            } else if (node.fillStyleId != '' && typeof node.fillStyleId != 'symbol' && node.fillStyleId.length > 0) {
+            } else {
 
-                let style = figma.getStyleById(node.fillStyleId) as PaintStyle;
-                colorStyles.push(style);
+                if (node.fillStyleId != '') {
+                    //get the style
+                    let id = node.fillStyleId as string;
+                    let style = figma.getStyleById(id) as PaintStyle;
 
+                    //add style to the array
+                    styles.push(style);
+                }
             }
-        }
-
-        //if there are color styles found, add them to the stylea array
-        if(colorStyles.length > 0) {
-            styles.concat(colorStyles);
         }
     }
 
     //TEXT
     if(styleTypes.text) {
-        let textStyles:TextStyle[] = []; 
 
-        //verify if text node, otherwise skip
-        if(node.type === 'TEXT') {
+        //check to see if the node is text
+        //text nodes can contain multiple styles
+        if (node.type === 'TEXT') {
 
-            //check for unique style when adding to array
-            let pushUniqueText = (style: TextStyle) => {
-                if (!textStyles.some((item) => item.key === style.key)) {
-                    textStyles.push(style)
+            if (node.textStyleId != '') {
+
+                if (typeof(node.textStyleId) === 'symbol') {
+
+                    let uniqueTextStyles = node.getStyledTextSegments(['textStyleId']);
+                    uniqueTextStyles.forEach(textStyle => {
+
+                        let id = textStyle.textStyleId as string;
+                        let style = figma.getStyleById(id) as TextStyle;
+    
+                        console.log(style);
+    
+                        //add style to the array
+                        styles.push(style);
+                        
+                    });
+
+                } else {
+
+                    let id = node.textStyleId as string;
+                    let style = figma.getStyleById(id) as TextStyle;
+
+                    //add style to the array
+                    styles.push(style);
+
                 }
+
             }
-
-            //check if symbol, if true
-            //this means there are multiple text styles in the text box and we need to iterate per character
-            if (typeof node.textStyleId === 'symbol') {
-                
-                let length = node.characters.length
-                for (let i = 0; i < length; i++) {
-                    let styleId = node.getRangeTextStyleId(i, i + 1) as string;
-                    let style:TextStyle;
-                    if (styleId != '' && styleId.length > 0) {
-                        style = figma.getStyleById(styleId) as TextStyle;
-                    }
-                    pushUniqueText(style);
-                }
-
-            } else if (node.textStyleId != '' && node.textStyleId.length > 0) {
-
-                let style = figma.getStyleById(node.textStyleId) as TextStyle;
-                textStyles.push(style);
-            
-            }
-        }
-
-        //if there are text styles found, add them to the styles array
-        if(textStyles.length > 0) {
-            styles.concat(textStyles);
         }
     }
 
     //EFFECT
     if(styleTypes.effect) {
-        let effectStyles:EffectStyle[] = [];
 
-        if (node.type != 'SLICE' && node.type != 'GROUP') {
+        //check to see if node supports fills
+        if (hasEffects(node)) {
 
-            if (node.effectStyleId != '' && node.effectStyleId.length > 0) {
-                let style = figma.getStyleById(node.effectStyleId) as EffectStyle;
-                effectStyles.push(style);
+            if (node.effectStyleId != '') {
+                //get the style
+                let id = node.effectStyleId as string;
+                let style = figma.getStyleById(id) as EffectStyle;
+
+                //add style to the array
+                styles.push(style);
             }
-
         }
-
-
-        //if there are effect styles found, add them to the stylea array
-        if(effectStyles.length > 0) {
-            styles.concat(effectStyles);
-        }
-
     }
 
-
-    //if the node has children, run the same function recursively
-    if (hasChildren(node)) {        
-        node.children.forEach(async child => {
-            getStylesFromNode(child, styleTypes);            
-        });
+    //repeat the process of the node has children
+    if (hasChildren(node)) {
+        if(node.children.length >= 1) {
+            node.children.forEach(child => {
+                getStylesFromNode(child, styleTypes);
+            })
+        }
     }
-
-    
 }

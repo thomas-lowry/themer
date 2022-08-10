@@ -55,8 +55,10 @@ function isPublished(styles) {
         try {
             //check to see if each style is published
             for (styles_1 = __asyncValues(styles); styles_1_1 = yield styles_1.next(), !styles_1_1.done;) {
-                const style = styles_1_1.value;
+                const item = styles_1_1.value;
+                let style = figma.getStyleById(item.id);
                 let published = yield style.getPublishStatusAsync();
+                //increase the count of published styles
                 if (published === 'CURRENT') {
                     numOfPublishedStyles++;
                 }
@@ -73,7 +75,7 @@ function isPublished(styles) {
         if (numOfPublishedStyles === numOfStyles) {
             publishedStatus = 'all';
         }
-        else if (numOfPublishedStyles > 1 && numOfPublishedStyles < numOfStyles) {
+        else if (numOfPublishedStyles >= 1 && numOfPublishedStyles < numOfStyles) {
             publishedStatus = 'some';
         }
         else {
@@ -83,20 +85,29 @@ function isPublished(styles) {
         return publishedStatus;
     });
 }
+//# sourceMappingURL=isPublished.js.map
 
 function assembleStylesArray(styles) {
-    let stylesArray = [];
+    let reformatedArray = [];
+    console.log('pre reform:', styles);
+    //Reformat array
     styles.forEach(style => {
         let item = {
             name: style.name,
-            id: style.id,
             key: style.key,
+            id: style.id,
+            theme: '',
             type: style.type
         };
-        stylesArray.push(item);
+        reformatedArray.push(item);
     });
-    return stylesArray;
+    console.log('reform: ', reformatedArray);
+    //filter our duplicate entries
+    let keys = reformatedArray.map(o => o.key);
+    let filteredArray = reformatedArray.filter(({ key }, index) => !keys.includes(key, index + 1));
+    return filteredArray;
 }
+//# sourceMappingURL=assembleStylesArray.js.map
 
 function getLocalStyles(styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -129,124 +140,141 @@ function getLocalStyles(styleTypes) {
                 styles = styles.concat(effectStyles);
             }
         }
+        let cleanedStyleData = assembleStylesArray(styles);
+        console.log('cleaned: ', cleanedStyleData);
         //determine if ALL, SOME, or NONE of the styles are published
-        let publishedStatus = yield isPublished(styles);
+        let publishedStatus = yield isPublished(cleanedStyleData);
         //send the data back to the UI
         figma.ui.postMessage({
             'type': 'createStyleData',
-            'styles': assembleStylesArray(styles),
+            'styles': cleanedStyleData,
             'publishedStatus': publishedStatus
         });
     });
 }
+//# sourceMappingURL=getLocalStyles.js.map
 
 const hasChildren = (node) => Boolean(node['children']);
+//# sourceMappingURL=hasChildren.js.map
 
-function removeDuplicatesBy(key, styleArray) {
-    var mySet = new Set();
-    return styleArray.filter(function (x) {
-        var key = key(x), isNew = !mySet.has(key);
-        if (isNew)
-            mySet.add(key);
-        return isNew;
-    });
-}
+const hasFills = (node) => Boolean(node['fillStyleId']);
+//# sourceMappingURL=hasFills.js.map
+
+const hasEffects = (node) => Boolean(node['effectStyleId']);
+//# sourceMappingURL=hasEffects.js.map
 
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
-        //collect all styles
-        nodes.forEach(node => {
-            getStylesFromNode(node, styleTypes);
-        });
-        //remove duplicate styles in the array
-        let cleanedStyleData = removeDuplicatesBy(style => style.key, styles);
-        //determine if ALL, SOME, or NONE of the styles are published
-        let publishedStatus = yield isPublished(styles);
-        //send the data back to the UI
-        figma.ui.postMessage({
-            'type': 'createStyleData',
-            'styles': assembleStylesArray(styles),
-            'publishedStatus': publishedStatus
-        });
+        //styles = [];
+        console.log('nodes', nodes);
+        if (nodes.length != 0) {
+            //this will loop over all nodes passed to the function
+            //it will past each node to a function to extract any styles
+            //if the node has children, it will pass the array of children back through the function
+            nodes.forEach(node => {
+                getStylesFromNode(node, styleTypes);
+            });
+            let cleanedStyleData = assembleStylesArray(styles);
+            console.log('cleaned: ', cleanedStyleData);
+            //determine if ALL, SOME, or NONE of the styles are published
+            let publishedStatus = yield isPublished(cleanedStyleData);
+            //send the data back to the UI
+            figma.ui.postMessage({
+                'type': 'createStyleData',
+                'styles': cleanedStyleData,
+                'publishedStatus': publishedStatus
+            });
+        }
+        else {
+            console.log('is this firing?');
+            //send the data back to the UI with the empty array
+            figma.ui.postMessage({
+                'type': 'createStyleData',
+                'styles': nodes,
+                'publishedStatus': 'none'
+            });
+        }
     });
 }
 //get all possible styles from the node
 function getStylesFromNode(node, styleTypes) {
     //COLOR
     if (styleTypes.color) {
-        let colorStyles = [];
-        //ignore these types of notes because they cannot have a fill style
-        //text nodes will be treated separately
-        if (node.type != 'SLICE' && node.type != 'GROUP') {
-            //check for unique style when adding to array
-            let pushUniqueColor = (style) => {
-                if (!colorStyles.some((item) => item.key === style.key)) {
-                    colorStyles.push(style);
-                }
-            };
-            if (node.type === 'TEXT' && typeof node.fillStyleId === 'symbol') {
-                let length = node.characters.length;
-                for (let i = 0; i < length; i++) {
-                    let styleId = node.getRangeFillStyleId(i, i + 1);
-                    let style;
-                    if (styleId != '' && styleId.length > 0) {
-                        style = figma.getStyleById(styleId);
-                    }
-                    pushUniqueColor(style);
+        //check to see if node supports fills
+        if (hasFills(node)) {
+            //check to see if the node is text
+            //text nodes can contain multiple styles
+            if (node.type === 'TEXT') {
+                let uniqueTextColorStyles = node.getStyledTextSegments(['fillStyleId']);
+                if (uniqueTextColorStyles.length != 0) {
+                    uniqueTextColorStyles.forEach(fillStyle => {
+                        let id = fillStyle.fillStyleId;
+                        let style = figma.getStyleById(id);
+                        //add style to the array
+                        styles.push(style);
+                    });
                 }
             }
-            else if (node.fillStyleId != '' && typeof node.fillStyleId != 'symbol' && node.fillStyleId.length > 0) {
-                let style = figma.getStyleById(node.fillStyleId);
-                colorStyles.push(style);
+            else {
+                if (node.fillStyleId != '') {
+                    //get the style
+                    let id = node.fillStyleId;
+                    let style = figma.getStyleById(id);
+                    //add style to the array
+                    styles.push(style);
+                }
             }
         }
     }
     //TEXT
     if (styleTypes.text) {
-        let textStyles = [];
-        //verify if text node, otherwise skip
+        //check to see if the node is text
+        //text nodes can contain multiple styles
         if (node.type === 'TEXT') {
-            //check for unique style when adding to array
-            let pushUniqueText = (style) => {
-                if (!textStyles.some((item) => item.key === style.key)) {
-                    textStyles.push(style);
+            if (node.textStyleId != '') {
+                if (typeof (node.textStyleId) === 'symbol') {
+                    let uniqueTextStyles = node.getStyledTextSegments(['textStyleId']);
+                    uniqueTextStyles.forEach(textStyle => {
+                        let id = textStyle.textStyleId;
+                        let style = figma.getStyleById(id);
+                        console.log(style);
+                        //add style to the array
+                        styles.push(style);
+                    });
                 }
-            };
-            //check if symbol, if true
-            //this means there are multiple text styles in the text box and we need to iterate per character
-            if (typeof node.textStyleId === 'symbol') {
-                let length = node.characters.length;
-                for (let i = 0; i < length; i++) {
-                    let styleId = node.getRangeTextStyleId(i, i + 1);
-                    let style;
-                    if (styleId != '' && styleId.length > 0) {
-                        style = figma.getStyleById(styleId);
-                    }
-                    pushUniqueText(style);
+                else {
+                    let id = node.textStyleId;
+                    let style = figma.getStyleById(id);
+                    //add style to the array
+                    styles.push(style);
                 }
-            }
-            else if (node.textStyleId != '' && node.textStyleId.length > 0) {
-                let style = figma.getStyleById(node.textStyleId);
-                textStyles.push(style);
             }
         }
     }
     //EFFECT
     if (styleTypes.effect) {
-        if (node.type != 'SLICE' && node.type != 'GROUP') {
-            if (node.effectStyleId != '' && node.effectStyleId.length > 0) {
-                let style = figma.getStyleById(node.effectStyleId);
+        //check to see if node supports fills
+        if (hasEffects(node)) {
+            if (node.effectStyleId != '') {
+                //get the style
+                let id = node.effectStyleId;
+                let style = figma.getStyleById(id);
+                //add style to the array
+                styles.push(style);
             }
         }
     }
-    //if the node has children, run the same function recursively
+    //repeat the process of the node has children
     if (hasChildren(node)) {
-        node.children.forEach((child) => __awaiter(this, void 0, void 0, function* () {
-            getStylesFromNode(child, styleTypes);
-        }));
+        if (node.children.length >= 1) {
+            node.children.forEach(child => {
+                getStylesFromNode(child, styleTypes);
+            });
+        }
     }
 }
+//# sourceMappingURL=getStylesFromNodes.js.map
 
 //imports
 function getStyleData(styleTypes, styleSource) {
@@ -255,40 +283,76 @@ function getStyleData(styleTypes, styleSource) {
     }
     else {
         let nodes;
-        let errorMsg;
         //get all of the nodes to pull styles from
         if (styleSource === 'selection') {
             nodes = Array.from(figma.currentPage.selection);
-            errorMsg = 'selected.';
         }
         else {
             nodes = Array.from(figma.currentPage.children);
-            errorMsg = 'on the current page.';
         }
-        if (nodes.length < 1) {
-            nodes.forEach(node => {
-                getStylesFromNodes(node, styleTypes);
-            });
-        }
-        else {
-            //throw an error if there are no nodes
-            figma.notify('There are no items ' + errorMsg);
-            //tell the UI to fail style validation
-            figma.ui.postMessage({
-                'createThemeError': true
-            });
-        }
+        //run the function which will iterate through all nodes
+        getStylesFromNodes(nodes, styleTypes);
     }
 }
+//# sourceMappingURL=getStyleData.js.map
 
-//imports
-// show the UI
-figma.showUI(__html__, { width: 240, height: 312 });
+//Vars
+//api credentials
+var apiSecret;
+var apiURL;
 //recieves msgs from the UI
 figma.ui.onmessage = msg => {
     switch (msg.type) {
+        //when the UI needs Figma to gather data to create a new theme, this function is executed
         case 'createTheme':
             getStyleData(msg.styleTypes, msg.styleSource);
             break;
+        //take msgs from the UI and show them to the user
+        case 'error':
+            figma.notify(msg.errorMsg);
+            break;
     }
 };
+// show the UI
+figma.showUI(__html__, { width: 240, height: 312 });
+//INITIALIZE PLUGIN
+//Check to see if credentials exist in client storage
+//we check to see if there is an API key for jsonbin and also a url to the bin
+//run on plugin initilization
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        console.log('figma: looking for existing themer data');
+        apiURL = yield figma.clientStorage.getAsync('apiURL');
+        apiSecret = yield figma.clientStorage.getAsync('apiSecret');
+        if (apiURL && apiSecret) {
+            //send a message to the UI with the credentials storred in the client
+            figma.ui.postMessage({
+                'type': 'apiCredentials',
+                'status': true,
+                'url': apiURL,
+                'secret': apiSecret
+            });
+        }
+        else {
+            console.log('figma: sending api credentials to UI');
+            //send a message to the UI that says there are no credentials storred in the client
+            figma.ui.postMessage({
+                'type': 'apiCredentials',
+                'status': false
+            });
+        }
+    }
+    catch (err) {
+        figma.ui.postMessage({
+            'type': 'apiCredentials',
+            'status': false
+        });
+    }
+}))();
+setTimeout(() => {
+    console.log('trying again...just in case');
+    figma.ui.postMessage({
+        'type': 'apiCredentials',
+        'status': false
+    });
+}, 1000);
