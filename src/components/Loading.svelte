@@ -43,7 +43,7 @@
     .loading__animation {
 		width: 52px;
 		height: 52px;
-		margin-top: -25px;
+		margin-top: -31px;
 		position: relative;
 	}
 

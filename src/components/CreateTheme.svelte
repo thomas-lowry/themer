@@ -109,15 +109,17 @@
             $step = 2;
         } else if ($step === 2) {
             getStyleData();
+        } else if ($step === 3) {
+            createTheme();
         }
     }
 
 
     //nextButtonValidator
     //this is a function that will bind the disabled value of the next button to a number of factors
-    
+    //doing this as a function because being able to move next is based on a lot of factors
+    //that are unique to each step
     let buttonDisabled;
-
     function validateButton() {
 
         if ($step === 1) {
@@ -190,7 +192,7 @@
             //tell the user there are no styles
             //add a slight 1s delay before disabling the loading state so it does not feel jarring
             setTimeout(() => {
-                parent.postMessage({ pluginMessage: { 'type': 'error', 'errorMsg': errorMsg } }, '*');
+                parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': errorMsg } }, '*');
                 $loading = false;
             }, 1000);
 
@@ -211,7 +213,7 @@
             //tell the user that the styles need to be published
             //add a slight 1s delay before disabling the loading state so it does not feel jarring
             setTimeout(() => {
-                parent.postMessage({ pluginMessage: { 'type': 'error', 'errorMsg': errorMsg } }, '*');
+                parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': errorMsg } }, '*');
                 $loading = false;
             }, 1000);
 
@@ -403,7 +405,7 @@
 }
 
 .header {
-   height: 40px;
+   height: 41px;
    box-shadow: 0px 1px 0px var(--black1);
 }
 

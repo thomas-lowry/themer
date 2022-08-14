@@ -5,29 +5,80 @@
 	import ThemesAndSettings from './components/ThemesAndSettings';
 	import Loading from './components/Loading';
 	import CreateTheme from './components/CreateTheme';
-	import { apiKey, binURL } from './scripts/stores.js';
+	import Onboarding from './components/Onboarding';
+	import { loading, apiKey, binURL, mainSection, onboarding } from './scripts/stores.js';
 
-	console.log('main ui loaded');
+	//display the loading screen first
+	$loading = true;
+
 
 	//when the plugin first runs, we listen for a msg from Figma to prep populate the UI
 	//with credentials for jsob bin
-
 	window.addEventListener('message', (event) => {
 
-		if (event.data.pluginMessage.type === 'apiCredentials') {
+		switch(event.data.pluginMessage.type) {
 
-			console.log('plugin: data found, initialization started');
+			//getting API credentials saved to the Figma Client
+			case 'apiCredentials':
 
-			//show the new user onboarding because no jsobbin credentials are found
-			if (event.data.pluginMessage.status == false) {
+				//show the new user onboarding because no jsobbin credentials are found
+				if (event.data.pluginMessage.status == false) {
 
-				console.log('plugin: initialization: no existing data found');
-				
-			} else { //pre populate fields in the UI
-				$binURL = event.data.pluginMessage.url;
-				$apiKey = event.data.pluginMessage.secret;
-			}
+					$onboarding =  true;
+					$mainSection = 'settings';
 
+					//turn off the loading state with brief delay
+					setTimeout(() => {
+						$loading = false;
+					}, 200);
+
+				} else { //pre populate fields in the UI
+
+					console.log('got data!');
+
+					$binURL = event.data.pluginMessage.binURL;
+					$apiKey = event.data.pluginMessage.apiKey;
+
+					//we will then attempt to connect to JSON bin to retrieve the themes
+
+					//turn off the loading state with brief delay
+					setTimeout(() => {
+						$loading = false;
+					}, 200);
+					
+				}
+
+				break;
+
+			//When Themer is reset, we send a msg to clear the api key and url
+			//This is called from the settings screen
+			//once successful, the plugin code sends a msg back
+			//we will then make sure the data is empty and show the first time user onboarding
+			case 'reset':
+
+				//clear previous values
+				$apiKey = '';
+				$binURL = '';
+
+				//re-anable onboarding flow
+				$onboarding = true;
+
+				//disable loading (with slight delay)
+				setTimeout(() => {
+					$loading = false;
+				}, 200);
+
+				break;
+
+			//after an attempt to create a brand new bin
+			case 'binCreated':
+
+				//disable loading (with slight delay)
+				setTimeout(() => {
+					$loading = false;
+				}, 200);
+
+				break;
 		}
 	});
 
@@ -49,7 +100,7 @@
 
 
 <!-- onboarding -->
-<!-- to do -->
+<Onboarding />
 
 <style>
 

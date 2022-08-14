@@ -20,7 +20,7 @@
 
 .tab-container {
     box-shadow: 0px 1px 0px var(--black1);
-    height: 40px;
+    height: 41px;
 }
 
 .tab {
