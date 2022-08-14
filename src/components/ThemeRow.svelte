@@ -14,7 +14,7 @@
 </script>
 
 
-<div {themeName} on:click={() => $selectedTheme = themeName} class:selected="{$selectedTheme === themeName}" class="themeRow flex flex-no-shrink align-items-center pl-xxsmall pr-xxxsmall {className}">
+<div {themeName} on:mousedown={() => $selectedTheme = themeName} class:selected="{$selectedTheme === themeName}" class="themeRow flex flex-no-shrink align-items-center pl-xxsmall pr-xxxsmall {className}">
 
     <div class="icon">
         {@html ThemeIcon}
@@ -35,12 +35,13 @@
 .themeRow {
     height: var(--size-medium);
     cursor: default;
+    outline: 1px solid transparent;
 }
 .themeRow:hover {
     background-color: var(--hover-fill);
 }
 
-.selected {
+.themeRow:active, .selected {
     background-color: var(--selection-b);
 }
 

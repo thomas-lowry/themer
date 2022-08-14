@@ -3,6 +3,7 @@
 	//import Global CSS from the svelte boilerplate
     import { GlobalCSS, Button } from 'figma-plugin-ds-svelte';
     import ThemeRow from './ThemeRow';
+    import SortableList from 'svelte-sortable-list';
     import { themeData, winWidth, createThemeUI } from '../scripts/stores.js';
     import EmptyStateIllustation from '../assets/empty-state.svg';
     
@@ -10,7 +11,8 @@
     let width = $winWidth + 'px';
     //export { className as class };
 
-    let themeString, themes;
+    let themeString;
+    let themes = [];
 
     //reactive function that will run every time there is a change to theme data
     $: $themeData, themeDataChange();
@@ -22,23 +24,43 @@
         themeString = JSON.stringify($themeData);
 
         //next we will populate an array of each individual
-        themes = [...new Set($themeData.map(item => item.theme))];
+        let uniqueThemes = [...new Set($themeData.map(item => item.theme))];
 
+        //turn this into an array of objects where each theme as an id
+        uniqueThemes.forEach((theme, index) => {
+            let item = {
+                id: index,
+                theme: theme
+            }
+            themes.push(item);
+        })
     }
+
+    const sortList = ev => {
+        if (themes) {
+            themes = ev.detail
+        }
+    };
 
 </script>
 
 <div class="container flex column" style="width:{width};">
 
+    
     <!-- render list of themes if they exist, else render empty state-->
-    {#if themes.length > 0 && themeString != '[{}]'}
+    {#if themes}
+        {#if themes.length > 0 && themeString != '[{}]'}
+            <div class="themelist flex-grow {className}">
+                
+                <SortableList bind:list={themes} key="id" on:sort={sortList} let:item>
+                    <ThemeRow themeName={item.theme}></ThemeRow>
+                </SortableList>
 
-        <!-- Theme list -->
-        <div class="themelist flex-grow pt-xxsmall {className}">
-            {#each themes as theme}
-                <ThemeRow themeName={theme}></ThemeRow>
-            {/each}
-        </div>
+
+                <!--  <ThemeRow themeName={theme}></ThemeRow> -->
+
+            </div> 
+        {/if}
 
     {:else}
 

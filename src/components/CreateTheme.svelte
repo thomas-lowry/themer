@@ -321,7 +321,6 @@
             //next we check for duplicates
             //duplicate = two entries with same key and theme name
             //if there is a duplicate, we will keep the one with the bigger index
-
             function isDuplicate(style, arr) {
                 return arr.some(x => (style.key == x.key) && (style.theme == x.theme))
             }
@@ -331,6 +330,8 @@
             for (const style of combinedThemeData) {
                 if (!isDuplicate(style, cleanData)) { cleanData.push(style) }
             }
+
+            console.log('clean data: ', cleanData);
 
             //stringify the data to send
             cleanData = JSON.stringify(cleanData);
