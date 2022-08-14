@@ -85,7 +85,6 @@ function isPublished(styles) {
         return publishedStatus;
     });
 }
-//# sourceMappingURL=isPublished.js.map
 
 function assembleStylesArray(styles) {
     let reformatedArray = [];
@@ -107,7 +106,6 @@ function assembleStylesArray(styles) {
     let filteredArray = reformatedArray.filter(({ key }, index) => !keys.includes(key, index + 1));
     return filteredArray;
 }
-//# sourceMappingURL=assembleStylesArray.js.map
 
 function getLocalStyles(styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -152,16 +150,12 @@ function getLocalStyles(styleTypes) {
         });
     });
 }
-//# sourceMappingURL=getLocalStyles.js.map
 
 const hasChildren = (node) => Boolean(node['children']);
-//# sourceMappingURL=hasChildren.js.map
 
 const hasFills = (node) => Boolean(node['fillStyleId']);
-//# sourceMappingURL=hasFills.js.map
 
 const hasEffects = (node) => Boolean(node['effectStyleId']);
-//# sourceMappingURL=hasEffects.js.map
 
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
@@ -274,7 +268,6 @@ function getStylesFromNode(node, styleTypes) {
         }
     }
 }
-//# sourceMappingURL=getStylesFromNodes.js.map
 
 //imports
 function getStyleData(styleTypes, styleSource) {
@@ -294,7 +287,6 @@ function getStyleData(styleTypes, styleSource) {
         getStylesFromNodes(nodes, styleTypes);
     }
 }
-//# sourceMappingURL=getStyleData.js.map
 
 function resetThemer() {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -312,7 +304,6 @@ function resetThemer() {
         'type': 'reset'
     });
 }
-//# sourceMappingURL=resetThemer.js.map
 
 function saveCredentials(apiKey, apiURL) {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -327,7 +318,6 @@ function saveCredentials(apiKey, apiURL) {
     }))();
     figma.notify('JSONBin setup successful. You can start creating themes now.');
 }
-//# sourceMappingURL=saveCredentials.js.map
 
 //api credentials
 var apiSecret;

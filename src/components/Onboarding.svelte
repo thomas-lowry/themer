@@ -2,15 +2,15 @@
 
     //imports
     import cssVars from 'svelte-css-vars';
-    import { winWidth, onboarding } from '../scripts/stores.js';
+    import { winHeight, onboarding } from '../scripts/stores.js';
 
     //ui visible
     //controls left position of the UI
-    $: uiLeftPos = ($onboarding) ? '0px' : $winWidth + 'px';
+    $: uiTopPos = ($onboarding) ? '0px' : $winHeight + 'px';
 
     //a collection of CSS vars that are referenced to control dynamic positioning of elements in the UI
     $: styleVars = {
-        uiLeft: uiLeftPos
+        uiTop: uiTopPos
     };
 
 </script>
@@ -25,12 +25,12 @@
 
 .container {
     position: absolute;
-    top: 0;
-    left: var(--uiLeft);
+    top: var(--uiTop);
+    left: 0;
     width: 100%;
     height: calc(100% - 2px);
     background-color: var(--white);
-    transition: left 200ms ease-out;
+    transition: top 200ms ease-out;
     z-index: 100;
 }
 

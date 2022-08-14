@@ -3,26 +3,40 @@
 	//import Global CSS from the svelte boilerplate
     import { GlobalCSS, Button } from 'figma-plugin-ds-svelte';
     import ThemeRow from './ThemeRow';
-    import { themes, mainSection, winWidth, createThemeUI } from '../scripts/stores.js';
+    import { themeData, winWidth, createThemeUI } from '../scripts/stores.js';
     import EmptyStateIllustation from '../assets/empty-state.svg';
     
     let className = '';
     let width = $winWidth + 'px';
-    
-    export { className as class };
+    //export { className as class };
 
+    let themeString, themes;
+
+    //reactive function that will run every time there is a change to theme data
+    $: $themeData, themeDataChange();
+
+    //handle changes to the theme data
+    function themeDataChange() {
+
+        //stringify the data so we can compare it to make sure we don't have an empty bin
+        themeString = JSON.stringify($themeData);
+
+        //next we will populate an array of each individual
+        themes = [...new Set($themeData.map(item => item.theme))];
+
+    }
 
 </script>
 
 <div class="container flex column" style="width:{width};">
 
     <!-- render list of themes if they exist, else render empty state-->
-    {#if $themes.length > 0}
+    {#if themes.length > 0 && themeString != '[{}]'}
 
         <!-- Theme list -->
         <div class="themelist flex-grow pt-xxsmall {className}">
-            {#each $themes as theme}
-                <ThemeRow themeName={theme.name}></ThemeRow>
+            {#each themes as theme}
+                <ThemeRow themeName={theme}></ThemeRow>
             {/each}
         </div>
 
@@ -32,15 +46,6 @@
         <div class="flex column flex-grow align-items-center justify-content-center"> 
             {@html EmptyStateIllustation}
             <Button on:click={() => $createThemeUI = true} variant='secondary' class="mt-xsmall mb-small">Create a theme</Button>
-        </div>
-
-    {/if}
-
-    {#if $themes.length > 0}
-
-        <!-- actions -->
-        <div class="flex flex-no-shrink footer pt-xxsmall pb-xxsmall pr-xsmall pl-xsmall justify-content-end">
-            <Button variant='primary'>Hello</Button>
         </div>
 
     {/if}

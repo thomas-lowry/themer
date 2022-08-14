@@ -6,11 +6,11 @@
 	import Loading from './components/Loading';
 	import CreateTheme from './components/CreateTheme';
 	import Onboarding from './components/Onboarding';
-	import { loading, apiKey, binURL, mainSection, onboarding } from './scripts/stores.js';
+	import DeleteTheme from './components/DeleteTheme';
+	import { loading, apiKey, binURL, mainSection, onboarding, themeData } from './scripts/stores.js';
 
 	//display the loading screen first
 	$loading = true;
-
 
 	//when the plugin first runs, we listen for a msg from Figma to prep populate the UI
 	//with credentials for jsob bin
@@ -34,17 +34,52 @@
 
 				} else { //pre populate fields in the UI
 
-					console.log('got data!');
+					$loading = true;
 
 					$binURL = event.data.pluginMessage.binURL;
 					$apiKey = event.data.pluginMessage.apiKey;
 
 					//we will then attempt to connect to JSON bin to retrieve the themes
+					//there are two possible outcomes here
+					//1. there are no themes but connection is successful = send them to theme list
+					//2. jsonbin connection is not successful, send them to settings list
 
-					//turn off the loading state with brief delay
-					setTimeout(() => {
-						$loading = false;
-					}, 200);
+					let req = new XMLHttpRequest();
+
+					req.onreadystatechange = () => {
+
+						//if the request is successful (1)
+						if (req.readyState == XMLHttpRequest.DONE && req.status === 200) {
+
+							let responseData = JSON.parse(req.responseText);
+							$themeData = responseData.record;
+
+							console.log('right after get', $themeData);
+
+							//turn off the loading state with brief delay
+							setTimeout(() => {
+								$loading = false;
+							}, 500);
+						
+						} else if (req.status >= 400) { //if unsuccessful (2)
+
+							//send user to the settings page
+							$mainSection = 'settings';
+							
+							//send error message to user
+							parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Connection to JSONBin failed. Double check your API key.'} }, '*');
+
+							//turn off the loading state with brief delay
+							setTimeout(() => {
+								$loading = false;
+							}, 500);
+
+						}
+					};
+
+					req.open('GET', $binURL + '/latest', true);
+					req.setRequestHeader('X-Master-Key', $apiKey);
+					req.send();
 					
 				}
 
@@ -98,9 +133,11 @@
 <!-- create theme sequence -->
 <CreateTheme />
 
-
 <!-- onboarding -->
 <Onboarding />
+
+<!-- delete theme dialog -->
+<DeleteTheme />
 
 <style>
 

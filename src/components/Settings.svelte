@@ -41,7 +41,6 @@
         //waits for the request
         req.onreadystatechange = () => {
             if (req.readyState == XMLHttpRequest.DONE && req.status === 200) {
-                console.log(req.responseText);
 
                 let responseData = JSON.parse(req.responseText);
 

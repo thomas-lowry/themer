@@ -3,7 +3,7 @@
     //imports
     import { Button, Icon, IconButton, IconBack, IconTheme, Switch, Radio, Checkbox, Input, Type, Label } from 'figma-plugin-ds-svelte';
     import cssVars from 'svelte-css-vars';
-    import { step, styleSource, styleTypeColor, styleTypeText, styleTypeEffect, winWidth, createThemeUI, loading, themes } from '../scripts/stores.js';
+    import { step, styleSource, styleTypeColor, styleTypeText, styleTypeEffect, winWidth, createThemeUI, loading, themeData, binURL, apiKey, mainSection } from '../scripts/stores.js';
 
     //var to store the raw style data we get back from Figma before processing it into theme data to store in JSON BIn
     //the UI will need to populate the "theme" property of each object depending on what the user decides
@@ -21,15 +21,15 @@
 
     //Validates the name of the theme
     function themeNameValidate() {
-        if(newThemeName != null) {
-            let match = $themes.find(theme => newThemeName.toLowerCase().trim() === theme.name.toLowerCase().trim());
-            if(match != undefined){
-                invalidThemeName = true;
-                errorMessage = 'Theme name already exists'
-            } else{
-                invalidThemeName = false;
-            }
-        }
+        // if(newThemeName != null) {
+        //     let match = $themeData.find(theme => newThemeName.toLowerCase().trim() === theme.theme.toLowerCase().trim());
+        //     if(match != undefined){
+        //         invalidThemeName = false;
+        //         errorMessage = 'A theme with this name already exists. Continuing will modify the existing theme.'
+        //     } else{
+        //         invalidThemeName = false;
+        //     }
+        // }
     }
     $: newThemeName, themeNameValidate(); //run this function every time the theme name changes 
     $: prefixedStyleNames, themeNameInput();
@@ -77,7 +77,6 @@
         uniqueThemeNamesFromPrefixes = [];
         prefixedStyleNames = false;
         prefixedNamesUnavailable = false;
-
 
     }
     $: $createThemeUI, resetCreateThemeUI(); //this var controls visibility of the create theme UI, run the reset when this value changes
@@ -152,6 +151,8 @@
     //makes request to Figma plugin API to get style data
     function getStyleData() {
 
+        //this an object of all of the styles types
+        //and if the user chose to include them as part of theme
         let styleTypes = {
             color: $styleTypeColor,
             text: $styleTypeText,
@@ -287,6 +288,107 @@
         }
 
     }
+
+    //create a theme, and send it to JSON Bin
+    function createTheme() {
+
+        //make sure the loading state is turned on
+        $loading = true;
+
+        //populate a var with the existing theme data
+        let combinedThemeData = $themeData;
+        let existingThemeDataAsString = JSON.stringify(combinedThemeData);
+
+        //remove the empty object if there is no existing data
+        //this is because we need to have at least one object in the array
+        //for the array to be valid json @ jsonBin
+        if (existingThemeDataAsString === '[{}]') {
+            combinedThemeData = [];
+        }
+
+        if (rawStyleData) {
+
+            //remove the id attribute, we don't need to save it
+            //push the style into the existing theme data array
+            rawStyleData.forEach(style => {
+                delete style.id;
+                combinedThemeData.push(style);
+            });
+
+            //reverse the array so we start with newer records
+            combinedThemeData = combinedThemeData.reverse();
+
+            //next we check for duplicates
+            //duplicate = two entries with same key and theme name
+            //if there is a duplicate, we will keep the one with the bigger index
+
+            function isDuplicate(style, arr) {
+                return arr.some(x => (style.key == x.key) && (style.theme == x.theme))
+            }
+
+            //a new array that we know is clean of duplicates
+            let cleanData = [];
+            for (const style of combinedThemeData) {
+                if (!isDuplicate(style, cleanData)) { cleanData.push(style) }
+            }
+
+            //stringify the data to send
+            cleanData = JSON.stringify(cleanData);
+
+            //next we send this brand new array to jsonBin
+            let req = new XMLHttpRequest();
+
+            req.onreadystatechange = () => {
+
+                //if the request is successful
+                if (req.readyState == XMLHttpRequest.DONE && req.status === 200) {
+
+                    //parse the respond data as a JSON array, update them $themeDate
+                    let responseData = JSON.parse(req.responseText);
+                    $themeData = responseData.record;
+
+                    //reset create theme UI for the next time
+                    $createThemeUI = false;
+
+                    //go to the theme list
+                    $mainSection = 'themes';
+
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $loading = false;
+                    }, 200);
+                
+                } else if (req.status >= 400) { //if unsuccessful (2)
+
+                    //reset create theme UI
+                    $createThemeUI = false;
+
+                    //send user to the settings page
+                    $mainSection = 'settings';
+                    
+                    //send error message to user
+                    parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Connection to JSONBin failed. Double check your API key.'} }, '*');
+
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $loading = false;
+                    }, 200);
+
+                }
+            };
+
+            req.open('PUT', $binURL, true);
+            req.setRequestHeader("Content-Type", "application/json");
+            req.setRequestHeader('X-Master-Key', $apiKey);
+            req.setRequestHeader('X-Bin-Versioning', false);
+            req.send(cleanData);
+
+        } else {
+            //tell the user there was an error
+            parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'There was a problem creating the theme(s).' } }, '*');
+        }
+    }
+
 
 
     // listen for msgs from plugin code
