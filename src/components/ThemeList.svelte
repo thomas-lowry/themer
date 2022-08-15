@@ -64,8 +64,8 @@
                 <DragList itemsData={themes} itemComponent={ThemeRow} onDrop={onDrop}/>
             </div>
 
-            <div class="footer flex row justify-content-end pt-xxsmall pb-xxsmall pr-xxsmall pl-xxsmall">
-                <Button on:click={() => applyTheme()} variant='primary' bind:disabled={themeIsSelected} class="">Apply to selection</Button>
+            <div class="footer flex row justify-content-end pt-xxsmall pb-xxsmall pr-xsmall pl-xsmall">
+                <Button on:click={() => applyTheme()} variant='primary' bind:disabled={themeIsSelected} class="flex-grow align-item justify-content-center">Apply to selection</Button>
             </div>
 
     {:else}

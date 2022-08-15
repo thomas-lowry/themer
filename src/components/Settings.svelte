@@ -94,7 +94,7 @@
         {@html HeaderGraphic}
     </div>
 
-    <div class="flex column flex-grow pt-xxsmall pl-xsmall pr-xsmall pb-xsmall justify-content-center">
+    <div class="flex column flex-grow pt-xxxsmall pl-xsmall pr-xsmall pb-xsmall justify-content-center">
         <Label>API Key</Label>
         <Input iconName={IconKey} placeholder="API key from JSONBin.com" bind:value={$apiKey} class="mb-xxsmall" borders=true />
 
@@ -102,7 +102,7 @@
         <Input iconName={IconHyperlink} bind:value={$binURL} placeholder="Leave empty to auto-generate" borders=true/>
     </div>
 
-    <div class="flex pb-xsmall pr-xsmall pl-xsmall justify-content-between">
+    <div class="flex pb-xxsmall pr-xsmall pl-xsmall justify-content-between">
         <Button variant='tertiary' on:click={() => resetThemer()}>Reset Themer</Button>
         <Button variant='primary' on:click={() => saveSettings()} disabled={$apiKey === ''}>Save</Button>
     </div>
@@ -113,13 +113,14 @@
 <style>
 
 .header {
+    padding-top: 1px;
     box-shadow: 0px 1px 0px var(--black1);
-    box-shadow: 0px -1px 0px var(--black1);
+
 }
 
 .container {
     width: 100%;
-    height: calc(100% - 2px);
+    height: 100%;
 }
 
 </style>

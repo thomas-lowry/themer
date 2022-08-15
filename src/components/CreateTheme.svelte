@@ -11,6 +11,9 @@
 
     //number of steps in the create theme process, easy to add more later
     let totalSteps = 3; 
+
+    //counter for styles that do not have themes
+    let numOfThemelessItems = 0;
     
     //theme name
     let newThemeName; //stores name of theme, only use this value if the user does not use foldered/prefixed names
@@ -77,6 +80,8 @@
         uniqueThemeNamesFromPrefixes = [];
         prefixedStyleNames = false;
         prefixedNamesUnavailable = false;
+        numOfThemelessItems = 0;
+        rawStyleData = [];
 
     }
     $: $createThemeUI, resetCreateThemeUI(); //this var controls visibility of the create theme UI, run the reset when this value changes
@@ -225,28 +230,18 @@
 
         } else {
 
-            //first we need to get the style data and populate a local var
-            //we will use this later outside of this function to prepare final data to send to jsonbin
-            rawStyleData = styles;
-
-            //create a scoped variable with the theme data returned from Figma
-            //we'll modify this to pre-populate the theme property
-            //this will help us determine prefixed theme splitting eligibility
-            let preValidationThemeData = styles;
-
             //determine if prefixes are present
             //if they are, put the prefix only into a new array
             //if there is a duplicate, don't push it
             //this way we can use the length of the array to determine amount of unqiue themes that will be created
-            preValidationThemeData.forEach(style => {
+            styles.forEach(style => {
                 if (style.name.includes('/')) {
                     let prefix = style.name.split('/');
                     if (!uniqueThemeNamesFromPrefixes.some(themePrefix => themePrefix === prefix[0])) {
                         uniqueThemeNamesFromPrefixes.push(prefix[0]);
-                        style.theme = prefix[0];
-                    } else {
-                        style.theme = prefix[0];
                     }
+                } else {
+                    numOfThemelessItems++;
                 }
             });
 
@@ -256,15 +251,7 @@
             //if they do not, keep this option disabled
             if (uniqueThemeNamesFromPrefixes.length >= 2) {
 
-                //iterate through all styles in the array
-                //if there are items with names which do not have prefixes
-                //increase the count
-                let numOfThemelessItems = 0;
-                preValidationThemeData.forEach(style => {
-                    if (style.theme === '') {
-                        numOfThemelessItems++;
-                    }
-                })
+                console.log('uniquePRef: ', uniqueThemeNamesFromPrefixes);
 
                 //if all styles have an associated theme, we can enable this option
                 //if there are outliers, we just allow the user to specify their own theme name
@@ -299,21 +286,31 @@
 
         //populate a var with the existing theme data
         let combinedThemeData = $themeData;
-        let existingThemeDataAsString = JSON.stringify(combinedThemeData);
 
         //remove the empty object if there is no existing data
         //this is because we need to have at least one object in the array
         //for the array to be valid json @ jsonBin
-        if (existingThemeDataAsString === '[{}]') {
+        if (JSON.stringify($themeData) === '[{}]') {
             combinedThemeData = [];
         }
 
         if (rawStyleData) {
 
             //remove the id attribute, we don't need to save it
+            //add the appropriate theme name
             //push the style into the existing theme data array
             rawStyleData.forEach(style => {
                 delete style.id;
+
+                if (prefixedStyleNames) {
+                    if (style.name.includes('/')) {
+                        let prefix = style.name.split('/');
+                        style.theme = prefix[0];
+                    }
+                } else {
+                    style.theme = newThemeName;
+                }
+
                 combinedThemeData.push(style);
             });
 
@@ -321,13 +318,6 @@
             combinedThemeData = combinedThemeData.reverse();
 
             console.log('pre clean data:', combinedThemeData);
-
-            //lets see if we need to modify the theme names based on the prefixing
-            if (!prefixedStyleNames) {
-                combinedThemeData.forEach(style => {
-                    style.theme = newThemeName;
-                });
-            }
 
             //next we check for duplicates
             //duplicate = two entries with same key and theme name
@@ -520,7 +510,7 @@
 }
 
 .header {
-   height: 41px;
+   height: 42px;
    box-shadow: 0px 1px 0px var(--black1);
 }
 
