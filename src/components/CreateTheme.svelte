@@ -173,6 +173,8 @@
 
         rawStyleData = styles;
 
+        console.log('raw:', styles);
+
         //first, we check if there are any styles
         //if there are none, there is no point in proceeding to step 3
         //tell the user by passing a msg back to the plugin
@@ -318,6 +320,15 @@
             //reverse the array so we start with newer records
             combinedThemeData = combinedThemeData.reverse();
 
+            console.log('pre clean data:', combinedThemeData);
+
+            //lets see if we need to modify the theme names based on the prefixing
+            if (!prefixedStyleNames) {
+                combinedThemeData.forEach(style => {
+                    style.theme = newThemeName;
+                });
+            }
+
             //next we check for duplicates
             //duplicate = two entries with same key and theme name
             //if there is a duplicate, we will keep the one with the bigger index
@@ -395,6 +406,7 @@
     // listen for msgs from plugin code
 	window.onmessage = async (event) => {
 		if (event.data.pluginMessage.type === 'createStyleData') {
+            console.log('fresh from plugin:', event.data.pluginMessage.styles)
 			validateStyleData(event.data.pluginMessage.styles, event.data.pluginMessage.publishedStatus);
 		}
 	}

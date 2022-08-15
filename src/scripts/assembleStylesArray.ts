@@ -20,6 +20,8 @@ export function assembleStylesArray(styles) {
     //filter our duplicate entries
     let keys = reformatedArray.map(o => o.key)
     let filteredArray = reformatedArray.filter(({key}, index) => !keys.includes(key, index + 1))
+
+    console.log('filtered: ', filteredArray)
     
     return filteredArray;
 }

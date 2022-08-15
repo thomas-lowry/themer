@@ -1,17 +1,16 @@
 <script>
 
 	//import Global CSS from the svelte boilerplate
-    import { GlobalCSS, Button } from 'figma-plugin-ds-svelte';
+    import { GlobalCSS, Button, SelectMenu } from 'figma-plugin-ds-svelte';
+    import DragList from './DragList';
     import ThemeRow from './ThemeRow';
-    import SortableList from 'svelte-sortable-list';
-    import { themeData, winWidth, createThemeUI } from '../scripts/stores.js';
+    import { themeData, winWidth, createThemeUI, selectedTheme } from '../scripts/stores.js';
     import EmptyStateIllustation from '../assets/empty-state.svg';
     
     let className = '';
     let width = $winWidth + 'px';
     //export { className as class };
 
-    let themeString;
     let themes = [];
 
     //reactive function that will run every time there is a change to theme data
@@ -20,47 +19,54 @@
     //handle changes to the theme data
     function themeDataChange() {
 
-        //stringify the data so we can compare it to make sure we don't have an empty bin
-        themeString = JSON.stringify($themeData);
+        if (JSON.stringify($themeData) != '[{}]') {
 
-        //next we will populate an array of each individual
-        let uniqueThemes = [...new Set($themeData.map(item => item.theme))];
+            themes = [];
+            console.log('there is data');
 
-        //turn this into an array of objects where each theme as an id
-        uniqueThemes.forEach((theme, index) => {
-            let item = {
-                id: index,
-                theme: theme
-            }
-            themes.push(item);
-        })
+            //next we will populate an array of each individual
+            let uniqueThemes = [...new Set($themeData.map(item => item.theme))];
+
+            //turn this into an array of objects where each theme as an id
+            uniqueThemes.forEach((theme, index) => {
+                let item = {
+                    id: index,
+                    theme: theme
+                }
+                themes.push(item);
+            });
+        } else {
+            themes = [];
+        }
     }
 
-    const sortList = ev => {
-        if (themes) {
-            themes = ev.detail
-        }
-    };
+    //update the theme ordering after the drop action
+    function onDrop(newItems) {
+		themes = newItems;
+	}
+
+    let themeIsSelected = false;
+    $: $selectedTheme, $selectedTheme ? themeIsSelected=false : themeIsSelected=true;
+
+    //apply theme
+    function applyTheme() {
+    
+    }
 
 </script>
 
 <div class="container flex column" style="width:{width};">
 
-    
     <!-- render list of themes if they exist, else render empty state-->
-    {#if themes}
-        {#if themes.length > 0 && themeString != '[{}]'}
+    {#if themes.length >= 1 && themes[0].theme != ''}
+
             <div class="themelist flex-grow {className}">
-                
-                <SortableList bind:list={themes} key="id" on:sort={sortList} let:item>
-                    <ThemeRow themeName={item.theme}></ThemeRow>
-                </SortableList>
+                <DragList itemsData={themes} itemComponent={ThemeRow} onDrop={onDrop}/>
+            </div>
 
-
-                <!--  <ThemeRow themeName={theme}></ThemeRow> -->
-
-            </div> 
-        {/if}
+            <div class="footer flex row justify-content-end pt-xxsmall pb-xxsmall pr-xxsmall pl-xxsmall">
+                <Button on:click={() => applyTheme()} variant='primary' bind:disabled={themeIsSelected} class="">Apply to selection</Button>
+            </div>
 
     {:else}
 

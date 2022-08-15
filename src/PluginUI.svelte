@@ -143,6 +143,7 @@
 
 	.container {
 		width: 100%;
+		overflow-y: hidden;
 	}
 
 </style>
