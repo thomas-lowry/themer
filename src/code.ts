@@ -2,7 +2,7 @@
 import { getStyleData } from './scripts/getStyleData';
 import { resetThemer } from './scripts/resetThemer';
 import { saveCredentials } from './scripts/saveCredentials';
-
+import { applyTheme, lintSelection } from './scripts/applyTheme';
 
 //api credentials
 var apiSecret:string;
@@ -12,6 +12,16 @@ var apiURL:string;
 figma.ui.onmessage = msg => {
 
 	switch(msg.type){
+
+		//apply theme to selection
+		case 'applyTheme':
+			applyTheme(msg.themeData, msg.theme);
+		break;
+
+		//lint selection
+		case 'lintSelection':
+			lintSelection();
+		break;
 
 		//when the UI needs Figma to gather data to create a new theme, this function is executed
 		case 'createTheme':
@@ -40,6 +50,7 @@ figma.ui.onmessage = msg => {
 // show the UI
 figma.showUI(__html__, {width: 240, height: 312 });
 
+
 //INITIALIZE PLUGIN
 //Check to see if credentials exist in client storage
 //we check to see if there is an API key for jsonbin and also a url to the bin
@@ -48,14 +59,25 @@ figma.showUI(__html__, {width: 240, height: 312 });
 
 	try {
 
-		console.log('figma: looking for existing themer data');
-
 		apiURL = await figma.clientStorage.getAsync('apiURL');
         apiSecret = await figma.clientStorage.getAsync('apiSecret');
-		    
+    
 		if (apiURL && apiSecret) {
 
-			console.log(apiURL, apiSecret);
+			//migration to new urls with jsonbin v3
+			if (!apiURL.includes('https://api.jsonbin.io/v3/b')) {
+			
+				apiURL.replace("https://api.jsonbin.io/b","https://api.jsonbin.io/v3/b");
+				console.log('old json bin url, migrating to v3');
+
+				//save the data back to client storage
+				try {
+					await figma.clientStorage.setAsync('apiURL', apiURL);		
+				} catch (err) {
+					figma.notify('There was an error migrating JSONbin to v3');
+				}
+
+			}
 
 			//send a message to the UI with the credentials storred in the client
 			figma.ui.postMessage({
@@ -66,8 +88,6 @@ figma.showUI(__html__, {width: 240, height: 312 });
 			});
 
 		} else {
-
-			console.log(apiURL, apiSecret);
 
 			//send a message to the UI that says there are no credentials storred in the client
 			figma.ui.postMessage({

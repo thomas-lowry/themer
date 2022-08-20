@@ -1,17 +1,14 @@
 //imports
 import { hasChildren } from "./hasChildren";
-import { hasFills } from "./hasFills";
+import { hasFillStyles } from "./hasFillStyles";
 import { hasEffects } from "./hasEffects";
 import { isPublished } from "./isPublished";
 import { assembleStylesArray } from "./assembleStylesArray";
+import { hasStrokeStyle } from "./hasStrokeStyle";
 
 let styles:BaseStyle[] = [];
 
 export async function getStylesFromNodes(nodes:SceneNode[], styleTypes) {
-
-        //styles = [];
-
-        console.log('nodes', nodes);
 
         if (nodes.length != 0) {
 
@@ -58,7 +55,7 @@ function getStylesFromNode(node, styleTypes) {
     if(styleTypes.color) {
 
         //check to see if node supports fills
-        if (hasFills(node)) {
+        if (hasFillStyles(node) || hasStrokeStyle(node)) {
 
             //check to see if the node is text
             //text nodes can contain multiple styles
@@ -81,16 +78,35 @@ function getStylesFromNode(node, styleTypes) {
 
             } else {
 
-                if (node.fillStyleId != '') {
-                    //get the style
-                    let id = node.fillStyleId as string;
-                    let style = figma.getStyleById(id) as PaintStyle;
-
-                    //add style to the array
-                    styles.push(style);
+                //if node supports fills check for fill styles
+                if (hasFillStyles(node)) {
+                    if (node.fillStyleId != '') {
+                        //get the style
+                        let id = node.fillStyleId as string;
+                        let style = figma.getStyleById(id) as PaintStyle;
+                        
+                        //add style to the array
+                        styles.push(style);
+                    }
                 }
+
+                //if node supports strokes check for fill styles
+                if (hasStrokeStyle(node)) {
+                    if (node.strokeStyleId != '') {
+                        //get the style
+                        let id = node.strokeStyleId as string;
+                        let style = figma.getStyleById(id) as PaintStyle;
+                        
+                        //add style to the array
+                        styles.push(style);
+                    }
+                }
+
+
             }
         }
+
+
     }
 
     //TEXT
@@ -109,8 +125,6 @@ function getStylesFromNode(node, styleTypes) {
 
                         let id = textStyle.textStyleId as string;
                         let style = figma.getStyleById(id) as TextStyle;
-    
-                        console.log(style);
     
                         //add style to the array
                         styles.push(style);

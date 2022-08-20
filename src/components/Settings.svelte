@@ -3,7 +3,7 @@
 	//import Global CSS from the svelte boilerplate
 	//contains Figma color vars, spacing vars, utility classes and more
     import { GlobalCSS, Input, Label, IconKey, IconHyperlink, Button } from 'figma-plugin-ds-svelte';
-    import { loading, winWidth, apiKey, binURL, mainSection, baseURL } from '../scripts/stores.js';
+    import { loading, winWidth, apiKey, binURL, mainSection, baseURL, themeData } from '../scripts/stores.js';
     import HeaderGraphic from '../assets/header.svg';
 
     let className = '';
@@ -25,65 +25,130 @@
 
     }
 
-    //function to connect to JSONBIn and create a new bin
-    // we will run this function with save button is pressed
+    //function to connect to JSONBIn and connect to a bin
+    //if the url is empty, we create a new empty bin
     function saveSettings() {
 
         //loading state
         $loading = true;
 
-        //JSON bin needs an empty array for it to be valid
-        let data = '[{}]';
+        //if the bin url is empty, we create a new bin
+        //this will send an empty json dataset to jsonBin
+        if (binURL === '') {
 
-        //connect to JSON bin and create the bin
-        let req = new XMLHttpRequest();
+            //JSON bin needs an empty array for it to be valid
+            let data = '[{}]';
 
-        //waits for the request
-        req.onreadystatechange = () => {
-            if (req.readyState == XMLHttpRequest.DONE && req.status === 200) {
+            //connect to JSON bin and create the bin
+            let req = new XMLHttpRequest();
 
-                let responseData = JSON.parse(req.responseText);
+            //waits for the request
+            req.onreadystatechange = () => {
+                if (req.readyState == XMLHttpRequest.DONE && req.status === 200) {
 
-                //get the data about the new bin
-                let binId = responseData.metadata.id;
-                $binURL = $baseURL + binId;
+                    let responseData = JSON.parse(req.responseText);
 
-                //send the data to figma to save to client storage + success msg
-                parent.postMessage({ pluginMessage: { 'type': 'saveCredentials', 'apiKey': $apiKey, 'binURL': $binURL} }, '*');
+                    //get the data about the new bin
+                    let binId = responseData.metadata.id;
+                    $binURL = $baseURL + binId;
 
-                //turn off the loading state with brief delay
-                setTimeout(() => {
-                    $loading = false;
-                }, 200);
+                    //send the data to figma to save to client storage + success msg
+                    parent.postMessage({ pluginMessage: { 'type': 'saveCredentials', 'apiKey': $apiKey, 'binURL': $binURL} }, '*');
 
-                //turn off the loading state with brief delay
-                setTimeout(() => {
-                    $mainSection = 'themes';
-                }, 700);
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $loading = false;
+                    }, 200);
+
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $mainSection = 'themes';
+                    }, 700);
 
 
-            } else if (req.status >= 400) {
+                } else if (req.status >= 400) {
 
-                //send error message to user
-                parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Connection to JSONBin failed. Double check your API key.'} }, '*');
+                    //send error message to user
+                    parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Connection to JSONBin failed. Double check your API key.'} }, '*');
 
-                //turn off the loading state with brief delay
-                setTimeout(() => {
-                    $loading = false;
-                }, 200);
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $loading = false;
+                    }, 200);
+                }
+            };
+
+            //make the request to JSON bin to create a bin to store theme data
+            req.open('POST', 'https://api.jsonbin.io/v3/b', true);
+            req.setRequestHeader('Content-Type', 'application/json');
+            req.setRequestHeader('X-Master-Key', $apiKey);
+            req.setRequestHeader('X-Bin-Name', 'Themer Figma Plugin');
+            req.send(data);
+
+        //binurl is present, make sure its a json bin url
+        //this could probably be more sophisticated but I am an idiot
+        } else if (!binURL.includes('https://api.jsonbin.io/v3/b/')) { 
+            
+            //send a message to the user with error state
+            parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Invalid bin url.'} }, '*');
+
+            //turn off the loading state with brief delay
+            setTimeout(() => {
+                $loading = false;
+            }, 200);
+
+        //if url is present we just want to connect to it and load the data
+        } else {
+
+            //detect if this is an older jsonbin url
+            if (!apiURL.includes('https://api.jsonbin.io/v3/b')) {
+                apiURL.replace("https://api.jsonbin.io/b","https://api.jsonbin.io/v3/b");
+				console.log('old json bin url, migrating to v3');
             }
-        };
 
-        //make the request to JSON bin to create a bin to store theme data
-        req.open('POST', 'https://api.jsonbin.io/v3/b', true);
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.setRequestHeader('X-Master-Key', $apiKey);
-        req.setRequestHeader('X-Bin-Name', 'Themer Figma Plugin');
-        req.send(data);
+            let req = new XMLHttpRequest();
+
+            req.onreadystatechange = () => {
+
+                //if the request is successful (1)
+                if (req.readyState == XMLHttpRequest.DONE && req.status === 200) {
+
+                    let responseData = JSON.parse(req.responseText);
+                    $themeData = responseData.record;
+
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $loading = false;
+                    }, 200);
+                
+                } else if (req.status >= 400) { //if unsuccessful (2)
+
+                    //send user to the settings page
+                    $mainSection = 'settings';
+                    
+                    //send error message to user
+                    parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Connection to JSONBin failed. Double check your API key.'} }, '*');
+
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $loading = false;
+                    }, 500);
+
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $mainSection = 'themes';
+                    }, 700);
+
+                }
+            };
+
+            req.open('GET', $binURL + '/latest', true);
+            req.setRequestHeader('X-Master-Key', $apiKey);
+            req.send();
+
+        }
         
     }
-
-
 
 
 </script>
@@ -94,17 +159,17 @@
         {@html HeaderGraphic}
     </div>
 
-    <div class="flex column flex-grow pt-xxxsmall pl-xsmall pr-xsmall pb-xsmall justify-content-center">
+    <div class="flex column flex-grow pl-xsmall pr-xsmall">
         <Label>API Key</Label>
-        <Input iconName={IconKey} placeholder="API key from JSONBin.com" bind:value={$apiKey} class="mb-xxsmall" borders=true />
+        <Input iconName={IconKey} placeholder="API key from JSONBin.com" bind:value={$apiKey} class="mb-xxxsmall" borders=true />
 
         <Label>URL to your JSONBin</Label>
         <Input iconName={IconHyperlink} bind:value={$binURL} placeholder="Leave empty to auto-generate" borders=true/>
     </div>
 
-    <div class="flex pb-xxsmall pr-xsmall pl-xsmall justify-content-between">
-        <Button variant='tertiary' on:click={() => resetThemer()}>Reset Themer</Button>
+    <div class="footer flex pr-xsmall pl-xsmall align-items-center justify-content-between">
         <Button variant='primary' on:click={() => saveSettings()} disabled={$apiKey === ''}>Save</Button>
+        <Button variant='tertiary' on:click={() => resetThemer()}>Reset Themer</Button>
     </div>
 
     </div>
@@ -116,6 +181,11 @@
     padding-top: 1px;
     box-shadow: 0px 1px 0px var(--black1);
 
+}
+
+.footer {
+    border-top: 1px solid var(--black1);
+    height:var(--size-xlarge);
 }
 
 .container {

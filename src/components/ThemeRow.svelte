@@ -33,15 +33,24 @@
 <style>
 
 .themeRow {
-    height: var(--size-medium);
+    height: calc(var(--size-medium) + 4px);
     cursor: default;
     outline: 1px solid transparent;
 }
 .themeRow:hover {
-    background-color: var(--hover-fill);
+    outline: 1px solid var(--blue);
+    outline-offset: -1px;
 }
 
-.themeRow:active, .selected {
+.themeRow.selected:hover {
+    outline: none;
+}
+
+.themeRow:active {
+    outline: none;
+}
+
+.selected {
     background-color: var(--selection-b);
 }
 

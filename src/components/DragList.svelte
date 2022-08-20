@@ -28,38 +28,38 @@
 		themesWithNewOrder = JSON.stringify(themesWithNewOrder);
 
 		//next we send this brand new array to jsonBin
-		let req = new XMLHttpRequest();
+		// let req = new XMLHttpRequest();
 
-		req.onreadystatechange = () => {
+		// req.onreadystatechange = () => {
 
-			//if the request is successful
-			if (req.readyState == XMLHttpRequest.DONE && req.status === 200) {
+		// 	//if the request is successful
+		// 	if (req.readyState == XMLHttpRequest.DONE && req.status === 200) {
 
-				//parse the respond data as a JSON array, update them $themeDate
-				let responseData = JSON.parse(req.responseText);
-				$themeData = responseData.record;
+		// 		//parse the respond data as a JSON array, update them $themeDate
+		// 		let responseData = JSON.parse(req.responseText);
+		// 		$themeData = responseData.record;
 
-				console.log('info successfully saved.');
+		// 		console.log('info successfully saved.');
 
 			
-			} else if (req.status >= 400) { //if unsuccessful (2)
+		// 	} else if (req.status >= 400) { //if unsuccessful (2)
 
-				//send error message to user
-				parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'There was an error saving the new theme order to JSONBin. Please try again.'} }, '*');
+		// 		//send error message to user
+		// 		parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'There was an error saving the new theme order to JSONBin. Please try again.'} }, '*');
 
-			}
-		};
+		// 	}
+		// };
 
-		req.open('PUT', $binURL, true);
-		req.setRequestHeader("Content-Type", "application/json");
-		req.setRequestHeader('X-Master-Key', $apiKey);
-		req.setRequestHeader('X-Bin-Versioning', false);
-		req.send(themesWithNewOrder);
+		// req.open('PUT', $binURL, true);
+		// req.setRequestHeader("Content-Type", "application/json");
+		// req.setRequestHeader('X-Master-Key', $apiKey);
+		// req.setRequestHeader('X-Bin-Versioning', false);
+		// req.send(themesWithNewOrder);
 
 	}
 </script>
 
-<section use:dndzone={{items: itemsData, flipDurationMs, autoAriaDisabled:true, morphDisabled:true, dropTargetStyle:{}}} on:consider={handleConsider} on:finalize={handleFinalize} class="pt-xxsmall">
+<section use:dndzone={{items: itemsData, flipDurationMs:0, autoAriaDisabled:true, morphDisabled:true, dropTargetStyle:{}}} on:consider={handleConsider} on:finalize={handleFinalize} class="pt-xxsmall">
 	{#each itemsData as item(item[idPropertyName])}
 		<div animate:flip={{duration: flipDurationMs}}>
 				<svelte:component this={itemComponent} themeName={item.theme}/>	

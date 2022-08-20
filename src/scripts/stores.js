@@ -1,5 +1,4 @@
 import { writable } from 'svelte/store';
-import { readable } from 'svelte/store';
 import {windowWidth, windowHeight } from '../scripts/windowSize';
 
 //exports

@@ -59,7 +59,7 @@
 							//turn off the loading state with brief delay
 							setTimeout(() => {
 								$loading = false;
-							}, 500);
+							}, 200);
 						
 						} else if (req.status >= 400) { //if unsuccessful (2)
 

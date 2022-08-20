@@ -50,7 +50,15 @@
 
     //apply theme
     function applyTheme() {
-    
+
+        //send a message to the UI to apply
+        parent.postMessage({ pluginMessage: { 'type': 'applyTheme', 'themeData': $themeData, 'theme': $selectedTheme } }, '*');
+
+    }
+
+    //lint selection
+    function lintSelection() {
+        parent.postMessage({ pluginMessage: { 'type': 'lintSelection' } }, '*');
     }
 
 </script>
@@ -64,8 +72,9 @@
                 <DragList itemsData={themes} itemComponent={ThemeRow} onDrop={onDrop}/>
             </div>
 
-            <div class="footer flex row justify-content-end pt-xxsmall pb-xxsmall pr-xsmall pl-xsmall">
+            <div class="footer flex row justify-content-end align-items-center pr-xsmall pl-xsmall">
                 <Button on:click={() => applyTheme()} variant='primary' bind:disabled={themeIsSelected} class="flex-grow align-item justify-content-center">Apply to selection</Button>
+                <Button on:click={() => lintSelection()} variant='tertiary' class="align-item justify-content-center ml-xsmall">Lint colors</Button>
             </div>
 
     {:else}
@@ -85,7 +94,7 @@
 <style>
 
 .container {
-    height: calc(100% - 2px);
+    height: 100%;
 }
 
 .themelist {
@@ -113,7 +122,7 @@
 
 .footer {
     border-top: 1px solid var(--black1);
-    height: calc (var(--size-xlarge)+1px);
+    height:var(--size-xlarge);
 }
 
 </style>

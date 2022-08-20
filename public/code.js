@@ -85,6 +85,7 @@ function isPublished(styles) {
         return publishedStatus;
     });
 }
+//# sourceMappingURL=isPublished.js.map
 
 function assembleStylesArray(styles) {
     let reformatedArray = [];
@@ -107,6 +108,7 @@ function assembleStylesArray(styles) {
     console.log('filtered: ', filteredArray);
     return filteredArray;
 }
+//# sourceMappingURL=assembleStylesArray.js.map
 
 function getLocalStyles(styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -151,18 +153,23 @@ function getLocalStyles(styleTypes) {
         });
     });
 }
+//# sourceMappingURL=getLocalStyles.js.map
 
 const hasChildren = (node) => Boolean(node['children']);
+//# sourceMappingURL=hasChildren.js.map
 
-const hasFills = (node) => Boolean(node['fillStyleId']);
+const hasFillStyles = (node) => Boolean(node['fillStyleId']);
+//# sourceMappingURL=hasFillStyles.js.map
 
 const hasEffects = (node) => Boolean(node['effectStyleId']);
+//# sourceMappingURL=hasEffects.js.map
+
+const hasStrokeStyle = (node) => Boolean(node['strokeStyleId']);
+//# sourceMappingURL=hasStrokeStyle.js.map
 
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
-        //styles = [];
-        console.log('nodes', nodes);
         if (nodes.length != 0) {
             //this will loop over all nodes passed to the function
             //it will past each node to a function to extract any styles
@@ -197,7 +204,7 @@ function getStylesFromNode(node, styleTypes) {
     //COLOR
     if (styleTypes.color) {
         //check to see if node supports fills
-        if (hasFills(node)) {
+        if (hasFillStyles(node) || hasStrokeStyle(node)) {
             //check to see if the node is text
             //text nodes can contain multiple styles
             if (node.type === 'TEXT') {
@@ -212,12 +219,25 @@ function getStylesFromNode(node, styleTypes) {
                 }
             }
             else {
-                if (node.fillStyleId != '') {
-                    //get the style
-                    let id = node.fillStyleId;
-                    let style = figma.getStyleById(id);
-                    //add style to the array
-                    styles.push(style);
+                //if node supports fills check for fill styles
+                if (hasFillStyles(node)) {
+                    if (node.fillStyleId != '') {
+                        //get the style
+                        let id = node.fillStyleId;
+                        let style = figma.getStyleById(id);
+                        //add style to the array
+                        styles.push(style);
+                    }
+                }
+                //if node supports strokes check for fill styles
+                if (hasStrokeStyle(node)) {
+                    if (node.strokeStyleId != '') {
+                        //get the style
+                        let id = node.strokeStyleId;
+                        let style = figma.getStyleById(id);
+                        //add style to the array
+                        styles.push(style);
+                    }
                 }
             }
         }
@@ -233,7 +253,6 @@ function getStylesFromNode(node, styleTypes) {
                     uniqueTextStyles.forEach(textStyle => {
                         let id = textStyle.textStyleId;
                         let style = figma.getStyleById(id);
-                        console.log(style);
                         //add style to the array
                         styles.push(style);
                     });
@@ -269,6 +288,7 @@ function getStylesFromNode(node, styleTypes) {
         }
     }
 }
+//# sourceMappingURL=getStylesFromNodes.js.map
 
 //imports
 function getStyleData(styleTypes, styleSource) {
@@ -288,6 +308,7 @@ function getStyleData(styleTypes, styleSource) {
         getStylesFromNodes(nodes, styleTypes);
     }
 }
+//# sourceMappingURL=getStyleData.js.map
 
 function resetThemer() {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -305,6 +326,7 @@ function resetThemer() {
         'type': 'reset'
     });
 }
+//# sourceMappingURL=resetThemer.js.map
 
 function saveCredentials(apiKey, apiURL) {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -319,6 +341,306 @@ function saveCredentials(apiKey, apiURL) {
     }))();
     figma.notify('JSONBin setup successful. You can start creating themes now.');
 }
+//# sourceMappingURL=saveCredentials.js.map
+
+const hasFills = (node) => Boolean(node['fills']);
+//# sourceMappingURL=hasFills.js.map
+
+const hasStrokes = (node) => Boolean(node['strokes']);
+//# sourceMappingURL=hasStrokes.js.map
+
+//variables we will use to apply the right type of styles
+let colorStyles = false;
+let textStyles = false;
+let effectStyles = false;
+//imported styles
+let importedStyles = []; //just the styles we're importing
+let allThemes = [];
+let stylesInTheme = []; //just the styles in the theme we are applying
+let selectedTheme; //name of the theme we are applying
+let lintFill = { "type": "SOLID", "visible": true, "opacity": 1, "blendMode": "NORMAL", "color": { "r": 1, "g": 0, "b": 1 } }; //fuchsia
+let lintFillText = { "type": "SOLID", "visible": true, "opacity": 1, "blendMode": "NORMAL", "color": { "r": 0.6705882549285889, "g": 0, "b": 0.6705882549285889 } };
+let lintCount = 0;
+//count the number of nodes
+//TO DO: do this more accurately an array of ids
+let count = 0;
+function applyTheme(themeData, theme) {
+    var e_1, _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        selectedTheme = theme;
+        allThemes = themeData;
+        //collect JUST the styles we will iterate through
+        stylesInTheme = themeData.filter(item => item.theme === theme);
+        //get for selection
+        let selection = figma.currentPage.selection;
+        //check for selection
+        if (selection.length >= 1) {
+            try {
+                //lets import all of the styles in the theme
+                for (var stylesInTheme_1 = __asyncValues(stylesInTheme), stylesInTheme_1_1; stylesInTheme_1_1 = yield stylesInTheme_1.next(), !stylesInTheme_1_1.done;) {
+                    const style = stylesInTheme_1_1.value;
+                    let remoteStyle;
+                    try {
+                        remoteStyle = yield figma.importStyleByKeyAsync(style.key);
+                        importedStyles.push(remoteStyle);
+                    }
+                    catch (error) {
+                        console.error(error);
+                    }
+                    if (remoteStyle.type === 'PAINT') {
+                        colorStyles = true;
+                    }
+                    ;
+                    if (remoteStyle.type === 'TEXT') {
+                        textStyles = true;
+                    }
+                    ;
+                    if (remoteStyle.type === 'EFFECT') {
+                        effectStyles = true;
+                    }
+                    ;
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (stylesInTheme_1_1 && !stylesInTheme_1_1.done && (_a = stylesInTheme_1.return)) yield _a.call(stylesInTheme_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            //console log out all imported styles
+            console.log('all imported styles: ', importedStyles);
+            //now we iterate through every node in the selection
+            selection.forEach(node => {
+                applyStyleToNode(node);
+            });
+            //Msg to user
+            figma.notify(selectedTheme + ' theme applied');
+        }
+        else {
+            figma.notify('Please make a selection');
+        }
+    });
+}
+function applyStyleToNode(node) {
+    var e_2, _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        //skip hidden nodes to improve performance
+        if (node.visible === true) {
+            //FILL & STROKE STYLES
+            if (colorStyles && hasFillStyles(node) && node.fillStyleId != '') {
+                //if the node does not have a mixed property, match and apply paint style
+                if (typeof (node.fillStyleId) != 'symbol') {
+                    //get the style currently applied to the node
+                    let originalStyle = figma.getStyleById(node.fillStyleId);
+                    //see if there is a matching style in the selected theme, apply it if there is
+                    let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
+                    if (matchedStyle !== null) {
+                        node.fillStyleId = matchedStyle.id;
+                        count++;
+                    }
+                    //for text nodes that have mixed color styles, match and apply paint style
+                }
+                else if (node.type === 'TEXT' && typeof (node.fillStyleId) === 'symbol') {
+                    //do this if there are multiple color styles in the same text box
+                    let uniqueTextColorStyles = node.getStyledTextSegments(['fillStyleId']);
+                    uniqueTextColorStyles.forEach(fillStyle => {
+                        //get the style currently applied to the node
+                        let originalStyle = figma.getStyleById(fillStyle.fillStyleId);
+                        //apply style if there is a match in selected theme
+                        let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
+                        if (matchedStyle !== null) {
+                            //apply the style to the correct range
+                            node.setRangeFillStyleId(fillStyle.start, fillStyle.end, matchedStyle.id);
+                            count++;
+                        }
+                    });
+                }
+            }
+            //for nodes with strokes
+            if (colorStyles && hasStrokeStyle(node) && node.strokeStyleId != '') {
+                //get the style currently applied to the node
+                let originalStyle = figma.getStyleById(node.strokeStyleId);
+                //see if there is a matching style in the selected theme, apply it if there is
+                let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
+                if (matchedStyle !== null) {
+                    node.strokeStyleId = matchedStyle.id;
+                    count++;
+                }
+            }
+            //TEXT STYLES
+            if (textStyles && node.type === "TEXT") {
+                //do this for text nodes with a single style applied
+                if (node.textStyleId != '' && typeof (node.textStyleId) != 'symbol') {
+                    //get the currently applied text style
+                    let originalStyle = figma.getStyleById(node.textStyleId);
+                    //see if there is a matching style in the selected theme
+                    let matchedStyle = returnMatchingStyle(originalStyle.name, 'TEXT');
+                    if (matchedStyle !== null) {
+                        //load the fonts for the new style
+                        yield figma.loadFontAsync({
+                            'family': matchedStyle.fontName.family,
+                            'style': matchedStyle.fontName.style
+                        });
+                        node.textStyleId = matchedStyle.id;
+                        count++;
+                    }
+                    //do this for text nodes that have multiple text styles
+                }
+                else if (typeof (node.textStyleId) === 'symbol') {
+                    //do this if there are multiple text styles in the same text box
+                    let uniqueTextStyles = node.getStyledTextSegments(['textStyleId']);
+                    try {
+                        for (var uniqueTextStyles_1 = __asyncValues(uniqueTextStyles), uniqueTextStyles_1_1; uniqueTextStyles_1_1 = yield uniqueTextStyles_1.next(), !uniqueTextStyles_1_1.done;) {
+                            const textStyle = uniqueTextStyles_1_1.value;
+                            let originalStyle = figma.getStyleById(textStyle.textStyleId);
+                            let matchedStyle = returnMatchingStyle(originalStyle.name, 'TEXT');
+                            if (matchedStyle !== null) {
+                                //load the fonts for the new style
+                                yield figma.loadFontAsync({
+                                    'family': matchedStyle.fontName.family,
+                                    'style': matchedStyle.fontName.style
+                                });
+                                //apply the style to the correct range
+                                node.setRangeTextStyleId(textStyle.start, textStyle.end, matchedStyle.id);
+                                count++;
+                            }
+                        }
+                    }
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (uniqueTextStyles_1_1 && !uniqueTextStyles_1_1.done && (_a = uniqueTextStyles_1.return)) yield _a.call(uniqueTextStyles_1);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
+                }
+            }
+            //EFFECT STYLES
+            if (effectStyles && hasEffects(node) && node.effectStyleId != '' && typeof (node.effectStyleId) != 'symbol') {
+                //get currently applied effect style
+                let originalStyle = figma.getStyleById(node.effectStyleId);
+                //see if there is a matching style in the selected theme
+                let matchedStyle = returnMatchingStyle(originalStyle.name, 'EFFECT');
+                console.log('this shit is about to fail.');
+                if (matchedStyle !== null) {
+                    node.effectStyleId = matchedStyle.id;
+                    count++;
+                }
+            }
+        }
+        //repeat the process for all children
+        if (hasChildren(node)) {
+            if (node.children.length >= 1) {
+                node.children.forEach(child => {
+                    applyStyleToNode(child);
+                });
+            }
+        }
+    });
+}
+//special function for linting
+function lintSelection() {
+    //get for selection
+    let selection = figma.currentPage.selection;
+    //check for selection
+    if (selection.length >= 1) {
+        //now we iterate through every node in the selection
+        selection.forEach(node => {
+            lintNode(node);
+        });
+        //Msg to user
+        figma.notify('Found ' + lintCount + ' layers without styles.');
+    }
+    else {
+        figma.notify('Please make a selection');
+    }
+}
+//apply linting styles
+function lintNode(node) {
+    //handle normal color nodes
+    if (hasFills(node) && node.fillStyleId === '' && typeof (node.fills) !== 'symbol') {
+        if (node.fills.length >= 1 && node.fills[0].visible === true) {
+            if (node.fills.length === 1) {
+                let newFills = [...node.fills];
+                if (node.type === 'TEXT') {
+                    newFills.push(lintFillText);
+                }
+                else {
+                    newFills.push(lintFill);
+                }
+                node.fills = newFills;
+            }
+        }
+    }
+    else if (node.type === 'TEXT' && typeof (node.fills) === 'symbol') {
+        //do this if there are multiple text styles in the same text box
+        let uniqueTextFills = node.getStyledTextSegments(['fills', 'fillStyleId']);
+        uniqueTextFills.forEach(fill => {
+            if (fill.fillStyleId === '') {
+                let newFills = [...node.fills];
+                newFills.push(lintFillText);
+                node.fills = newFills;
+                node.setRangeFills(fill.start, fill.end, newFills);
+            }
+        });
+    }
+    //handle strokes
+    if (hasStrokes(node) && node.strokeStyleId === '') {
+        if (node.strokes.length > 0) {
+            if (node.strokes.length === 1 && node.strokes[0].visible === true) {
+                let newFills = [...node.strokes];
+                newFills.push(lintFill);
+                node.strokes = newFills;
+            }
+        }
+    }
+    //repeat the process for all children
+    if (hasChildren(node)) {
+        if (node.children.length >= 1) {
+            node.children.forEach(child => {
+                lintNode(child);
+            });
+        }
+    }
+}
+//HELPERS
+//find a matching style in the selected theme
+function returnMatchingStyle(name, type) {
+    console.log('name of original style:', name);
+    //make an array of all of the unique theme names
+    let uniqueThemes = [...new Set(allThemes.map(item => item.theme))];
+    //normalize style name for matching
+    let normalizedCurrentStyleName = processStyleNameWithThemeNameIncluded(name, uniqueThemes);
+    console.log('name of original style (normalized):', normalizedCurrentStyleName);
+    let match = null;
+    //iterate through all styles
+    importedStyles.forEach(style => {
+        let normalizedNewStyleName = processStyleNameWithThemeNameIncluded(style.name, uniqueThemes);
+        if (normalizedNewStyleName === normalizedCurrentStyleName && style.type === type) {
+            match = style;
+        }
+    });
+    return match;
+}
+//this will check to see if the name of theme is present in the style name
+//but it also checks to make sure that theme name is in the prefix of the style name
+//if those conditions are met, strip the theme from the style name
+//if not, return the full name
+function processStyleNameWithThemeNameIncluded(name, uniqueThemes) {
+    let newName;
+    let splitName = name.split('/');
+    if (splitName.length >= 2) {
+        uniqueThemes.forEach(theme => {
+            if (splitName[0].includes(theme)) {
+                splitName.shift();
+                newName = splitName.join('/').toString();
+            }
+        });
+    }
+    return newName ? newName : name;
+}
+//# sourceMappingURL=applyTheme.js.map
 
 //api credentials
 var apiSecret;
@@ -326,6 +648,14 @@ var apiURL;
 //recieves msgs from the UI
 figma.ui.onmessage = msg => {
     switch (msg.type) {
+        //apply theme to selection
+        case 'applyTheme':
+            applyTheme(msg.themeData, msg.theme);
+            break;
+        //lint selection
+        case 'lintSelection':
+            lintSelection();
+            break;
         //when the UI needs Figma to gather data to create a new theme, this function is executed
         case 'createTheme':
             getStyleData(msg.styleTypes, msg.styleSource);
@@ -353,11 +683,21 @@ figma.showUI(__html__, { width: 240, height: 312 });
 //run on plugin initilization
 (() => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log('figma: looking for existing themer data');
         apiURL = yield figma.clientStorage.getAsync('apiURL');
         apiSecret = yield figma.clientStorage.getAsync('apiSecret');
         if (apiURL && apiSecret) {
-            console.log(apiURL, apiSecret);
+            //migration to new urls with jsonbin v3
+            if (!apiURL.includes('https://api.jsonbin.io/v3/b')) {
+                apiURL.replace("https://api.jsonbin.io/b", "https://api.jsonbin.io/v3/b");
+                console.log('old json bin url, migrating to v3');
+                //save the data back to client storage
+                try {
+                    yield figma.clientStorage.setAsync('apiURL', apiURL);
+                }
+                catch (err) {
+                    figma.notify('There was an error migrating JSONbin to v3');
+                }
+            }
             //send a message to the UI with the credentials storred in the client
             figma.ui.postMessage({
                 'type': 'apiCredentials',
@@ -367,7 +707,6 @@ figma.showUI(__html__, { width: 240, height: 312 });
             });
         }
         else {
-            console.log(apiURL, apiSecret);
             //send a message to the UI that says there are no credentials storred in the client
             figma.ui.postMessage({
                 'type': 'apiCredentials',
