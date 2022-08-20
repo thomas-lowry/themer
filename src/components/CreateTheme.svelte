@@ -454,7 +454,7 @@
                     <Input iconName={IconTheme} bind:placeholder={themeNamePlaceholder} borders=true bind:invalid={invalidThemeName} bind:errorMessage={errorMessage} bind:value={newThemeName} bind:disabled={prefixedStyleNames}/> 
                 </div>
                 <div class="flex column">
-                    <Checkbox bind:checked={prefixedStyleNames} bind:disabled={prefixedNamesUnavailable}>Create multiple themes using prefixed style names</Checkbox>
+                    <Checkbox bind:checked={prefixedStyleNames} bind:disabled={prefixedNamesUnavailable}>Create multiple themes from grouped styles</Checkbox>
                 </div>
 
                 {#if prefixedStyleNames === true}

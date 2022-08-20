@@ -4,7 +4,7 @@
     import { GlobalCSS, Button, SelectMenu } from 'figma-plugin-ds-svelte';
     import DragList from './DragList';
     import ThemeRow from './ThemeRow';
-    import { themeData, winWidth, createThemeUI, selectedTheme } from '../scripts/stores.js';
+    import { themeData, winWidth, createThemeUI, selectedTheme, reOrdered } from '../scripts/stores.js';
     import EmptyStateIllustation from '../assets/empty-state.svg';
     
     let className = '';
@@ -21,23 +21,30 @@
 
         if (JSON.stringify($themeData) != '[{}]') {
 
-            themes = [];
-            console.log('there is data');
+            if (!$reOrdered) {
 
-            //next we will populate an array of each individual
-            let uniqueThemes = [...new Set($themeData.map(item => item.theme))];
+                themes = [];
+                console.log('there is data');
 
-            //turn this into an array of objects where each theme as an id
-            uniqueThemes.forEach((theme, index) => {
-                let item = {
-                    id: index,
-                    theme: theme
-                }
-                themes.push(item);
-            });
+                //next we will populate an array of each individual
+                let uniqueThemes = [...new Set($themeData.map(item => item.theme))];
+
+                console.log('unique themes: ', uniqueThemes);
+
+                //turn this into an array of objects where each theme as an id
+                uniqueThemes.forEach((theme, index) => {
+                    let item = {
+                        id: index,
+                        theme: theme
+                    }
+                    themes.push(item);
+                });
+            }
+
         } else {
             themes = [];
         }
+
     }
 
     //update the theme ordering after the drop action
@@ -69,7 +76,7 @@
     {#if themes.length >= 1 && themes[0].theme != ''}
 
             <div class="themelist flex-grow {className}">
-                <DragList itemsData={themes} itemComponent={ThemeRow} onDrop={onDrop}/>
+                <DragList bind:itemsData={themes} itemComponent={ThemeRow} onDrop={onDrop}/>
             </div>
 
             <div class="footer flex row justify-content-end align-items-center pr-xsmall pl-xsmall">

@@ -2,9 +2,10 @@
 
 	//import Global CSS from the svelte boilerplate
 	//contains Figma color vars, spacing vars, utility classes and more
-    import { GlobalCSS, Input, Label, IconKey, IconHyperlink, Button } from 'figma-plugin-ds-svelte';
+    import { GlobalCSS, Input, Label, IconKey, IconHyperlink, Button, IconButton } from 'figma-plugin-ds-svelte';
     import { loading, winWidth, apiKey, binURL, mainSection, baseURL, themeData } from '../scripts/stores.js';
     import HeaderGraphic from '../assets/header.svg';
+    import IconHelp from '../assets/help.svg';
 
     let className = '';
     let width = $winWidth + 'px';
@@ -150,20 +151,28 @@
         
     }
 
+    //launch the video tutorial 
+    function videoTutorial() {
+
+    }
+
 
 </script>
 
 <div class="container flex column {className}" style="width:{width};">
 
     <div class="header">
+        <div class="get-help flex aling-content-center justify-content-center align-items-center">
+            <IconButton iconName={IconHelp} on:click={() => videoTutorial() } />
+        </div>
         {@html HeaderGraphic}
     </div>
 
-    <div class="flex column flex-grow pl-xsmall pr-xsmall">
-        <Label>API Key</Label>
-        <Input iconName={IconKey} placeholder="API key from JSONBin.com" bind:value={$apiKey} class="mb-xxxsmall" borders=true />
+    <div class="flex column flex-grow pt-xsmall pl-xsmall pr-xsmall">
+        <div class="label-offset"><Label>API Key</Label></div>
+        <Input iconName={IconKey} placeholder="API key from JSONBin.com" bind:value={$apiKey} class="mb-xxsmall" borders=true />
 
-        <Label>URL to your JSONBin</Label>
+        <div class="label-offset"><Label>URL to your JSONBin</Label></div>
         <Input iconName={IconHyperlink} bind:value={$binURL} placeholder="Leave empty to auto-generate" borders=true/>
     </div>
 
@@ -178,9 +187,21 @@
 <style>
 
 .header {
+    position: relative;
     padding-top: 1px;
     box-shadow: 0px 1px 0px var(--black1);
 
+}
+
+.label-offset {
+    margin-left: -8px;
+}
+
+.get-help {
+    display: block;
+    position: absolute;
+    top: 5px;
+    right: 4px;
 }
 
 .footer {

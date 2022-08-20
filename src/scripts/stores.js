@@ -20,6 +20,7 @@ export const winWidth = writable(windowWidth());
 export const winHeight = writable(windowHeight());
 export const themeToDelete = writable('');
 export const selectedTheme = writable('');
+export const reOrdered = writable(false);
 
 //capture where to pull styles from
 //this is set to local since by default, themer will try to create themes from local styles vs. a selection
