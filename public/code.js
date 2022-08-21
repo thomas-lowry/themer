@@ -85,7 +85,6 @@ function isPublished(styles) {
         return publishedStatus;
     });
 }
-//# sourceMappingURL=isPublished.js.map
 
 function assembleStylesArray(styles) {
     let reformatedArray = [];
@@ -108,7 +107,6 @@ function assembleStylesArray(styles) {
     console.log('filtered: ', filteredArray);
     return filteredArray;
 }
-//# sourceMappingURL=assembleStylesArray.js.map
 
 function getLocalStyles(styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -153,19 +151,14 @@ function getLocalStyles(styleTypes) {
         });
     });
 }
-//# sourceMappingURL=getLocalStyles.js.map
 
 const hasChildren = (node) => Boolean(node['children']);
-//# sourceMappingURL=hasChildren.js.map
 
 const hasFillStyles = (node) => Boolean(node['fillStyleId']);
-//# sourceMappingURL=hasFillStyles.js.map
 
 const hasEffects = (node) => Boolean(node['effectStyleId']);
-//# sourceMappingURL=hasEffects.js.map
 
 const hasStrokeStyle = (node) => Boolean(node['strokeStyleId']);
-//# sourceMappingURL=hasStrokeStyle.js.map
 
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
@@ -288,7 +281,6 @@ function getStylesFromNode(node, styleTypes) {
         }
     }
 }
-//# sourceMappingURL=getStylesFromNodes.js.map
 
 //imports
 function getStyleData(styleTypes, styleSource) {
@@ -308,7 +300,6 @@ function getStyleData(styleTypes, styleSource) {
         getStylesFromNodes(nodes, styleTypes);
     }
 }
-//# sourceMappingURL=getStyleData.js.map
 
 function resetThemer() {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -326,7 +317,6 @@ function resetThemer() {
         'type': 'reset'
     });
 }
-//# sourceMappingURL=resetThemer.js.map
 
 function saveCredentials(apiKey, apiURL) {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -341,13 +331,10 @@ function saveCredentials(apiKey, apiURL) {
     }))();
     figma.notify('JSONBin setup successful. You can start creating themes now.');
 }
-//# sourceMappingURL=saveCredentials.js.map
 
 const hasFills = (node) => Boolean(node['fills']);
-//# sourceMappingURL=hasFills.js.map
 
 const hasStrokes = (node) => Boolean(node['strokes']);
-//# sourceMappingURL=hasStrokes.js.map
 
 //variables we will use to apply the right type of styles
 let colorStyles = false;
@@ -726,4 +713,3 @@ figma.showUI(__html__, { width: 240, height: 312 });
         });
     }
 }))();
-//# sourceMappingURL=code.js.map

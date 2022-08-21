@@ -88,7 +88,7 @@
 
         //binurl is present, make sure its a json bin url
         //this could probably be more sophisticated but I am an idiot
-        } else if (!$binURL.includes('https://api.jsonbin.io/v3/b/')) { 
+        } else if (!$binURL.includes('https://api.jsonbin.io/')) { 
             
             //send a message to the user with error state
             parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Invalid bin url.'} }, '*');
@@ -103,7 +103,9 @@
 
             //detect if this is an older jsonbin url
             if (!$binURL.includes('https://api.jsonbin.io/v3/b')) {
-                $binURL.replace('https://api.jsonbin.io/b','https://api.jsonbin.io/v3/b');
+                $binURL = $binURL.replace('https://api.jsonbin.io/b','https://api.jsonbin.io/v3/b');
+
+                console.log('new bin url: ', $binURL);
 				console.log('old json bin url, migrating to v3');
             }
 
@@ -147,6 +149,7 @@
             };
 
             req.open('GET', $binURL + '/latest', true);
+            req.setRequestHeader('Content-Type', 'application/json');
             req.setRequestHeader('X-Master-Key', $apiKey);
             req.send();
 

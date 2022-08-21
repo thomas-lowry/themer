@@ -143,6 +143,9 @@
             $mainSection = 'themes';
         }
 
+        prevDisabled = true;
+        nextDisabled = false;
+
         //turn off the loading state with brief delay
         setTimeout(() => {
             step = 1;
