@@ -25,7 +25,7 @@ let lintCount = 0;
 
 //count the number of nodes
 //TO DO: do this more accurately an array of ids
-let count = 0;
+let count = [];
 
 export async function applyTheme(themeData, theme) {
 
@@ -66,8 +66,15 @@ export async function applyTheme(themeData, theme) {
             applyStyleToNode(node);
         })
 
+        //get unique
+        let actualCount = [...new Set(count)];
+
         //Msg to user
-        figma.notify(selectedTheme + ' theme applied');
+        if (actualCount.length > 0) {
+            figma.notify(selectedTheme + ' theme applied to ' + actualCount.length + ' layers');
+        } else {
+            figma.notify('No styles from your themes were found.');
+        }
 
     } else {
         figma.notify('Please make a selection');
@@ -93,7 +100,7 @@ async function applyStyleToNode(node:SceneNode) {
 
                 if (matchedStyle !== null) {
                     node.fillStyleId = matchedStyle.id;
-                    count++;
+                    count.push(node.id);
                 }
 
             //for text nodes that have mixed color styles, match and apply paint style
@@ -112,7 +119,7 @@ async function applyStyleToNode(node:SceneNode) {
                     if (matchedStyle!== null) {
                         //apply the style to the correct range
                         node.setRangeFillStyleId(fillStyle.start, fillStyle.end, matchedStyle.id);
-                        count++;
+                        count.push(node.id);
                     }
                 
                 });
@@ -127,7 +134,7 @@ async function applyStyleToNode(node:SceneNode) {
             let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT') as PaintStyle;
             if (matchedStyle !== null) {
                 node.strokeStyleId = matchedStyle.id;
-                count++;
+                count.push(node.id);
             }
         }
 
@@ -151,7 +158,7 @@ async function applyStyleToNode(node:SceneNode) {
                         'style': matchedStyle.fontName.style
                     });
                     node.textStyleId = matchedStyle.id;
-                    count++;
+                    count.push(node.id);
                 }
 
             //do this for text nodes that have multiple text styles
@@ -174,7 +181,7 @@ async function applyStyleToNode(node:SceneNode) {
 
                         //apply the style to the correct range
                         node.setRangeTextStyleId(textStyle.start, textStyle.end,matchedStyle.id);
-                        count++;
+                        count.push(node.id);
 
                     }
                 }
@@ -190,11 +197,9 @@ async function applyStyleToNode(node:SceneNode) {
             //see if there is a matching style in the selected theme
             let matchedStyle = returnMatchingStyle(originalStyle.name, 'EFFECT') as EffectStyle;
 
-            console.log('this shit is about to fail.')
-
             if (matchedStyle !== null) {
                 node.effectStyleId = matchedStyle.id;
-                count++;
+                count.push(node.id);
             }
 
         }
@@ -330,11 +335,11 @@ function returnMatchingStyle(name, type):BaseStyle {
 //if not, return the full name
 function processStyleNameWithThemeNameIncluded(name, uniqueThemes) {
     let newName;
-    let splitName = name.split('/');
+    let splitName = name.toLowerCase().split('/');
 
     if (splitName.length >= 2) {
         uniqueThemes.forEach(theme => {
-            if(splitName[0].includes(theme)){
+            if(splitName[0].includes(theme.toLowerCase())){
                 splitName.shift();
                 newName = splitName.join('/').toString(); 
             }

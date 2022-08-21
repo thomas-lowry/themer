@@ -84,7 +84,6 @@
 
             <div class="footer flex row justify-content-end align-items-center pr-xsmall pl-xsmall">
                 <Button on:click={() => applyTheme()} variant='primary' bind:disabled={themeIsSelected} class="flex-grow align-item justify-content-center">Apply to selection</Button>
-                <Button on:click={() => lintSelection()} variant='tertiary' class="align-item justify-content-center ml-xsmall">Lint colors</Button>
             </div>
 
     {:else}

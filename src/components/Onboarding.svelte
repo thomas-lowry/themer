@@ -142,6 +142,11 @@
             $onboarding = false;
             $mainSection = 'themes';
         }
+
+        //turn off the loading state with brief delay
+        setTimeout(() => {
+            step = 1;
+        }, 200);
     }
 
     //ui visible

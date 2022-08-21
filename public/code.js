@@ -85,6 +85,7 @@ function isPublished(styles) {
         return publishedStatus;
     });
 }
+//# sourceMappingURL=isPublished.js.map
 
 function assembleStylesArray(styles) {
     let reformatedArray = [];
@@ -107,6 +108,7 @@ function assembleStylesArray(styles) {
     console.log('filtered: ', filteredArray);
     return filteredArray;
 }
+//# sourceMappingURL=assembleStylesArray.js.map
 
 function getLocalStyles(styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -151,14 +153,19 @@ function getLocalStyles(styleTypes) {
         });
     });
 }
+//# sourceMappingURL=getLocalStyles.js.map
 
 const hasChildren = (node) => Boolean(node['children']);
+//# sourceMappingURL=hasChildren.js.map
 
 const hasFillStyles = (node) => Boolean(node['fillStyleId']);
+//# sourceMappingURL=hasFillStyles.js.map
 
 const hasEffects = (node) => Boolean(node['effectStyleId']);
+//# sourceMappingURL=hasEffects.js.map
 
 const hasStrokeStyle = (node) => Boolean(node['strokeStyleId']);
+//# sourceMappingURL=hasStrokeStyle.js.map
 
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
@@ -281,6 +288,7 @@ function getStylesFromNode(node, styleTypes) {
         }
     }
 }
+//# sourceMappingURL=getStylesFromNodes.js.map
 
 //imports
 function getStyleData(styleTypes, styleSource) {
@@ -300,6 +308,7 @@ function getStyleData(styleTypes, styleSource) {
         getStylesFromNodes(nodes, styleTypes);
     }
 }
+//# sourceMappingURL=getStyleData.js.map
 
 function resetThemer() {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -317,6 +326,7 @@ function resetThemer() {
         'type': 'reset'
     });
 }
+//# sourceMappingURL=resetThemer.js.map
 
 function saveCredentials(apiKey, apiURL) {
     (() => __awaiter(this, void 0, void 0, function* () {
@@ -331,10 +341,13 @@ function saveCredentials(apiKey, apiURL) {
     }))();
     figma.notify('JSONBin setup successful. You can start creating themes now.');
 }
+//# sourceMappingURL=saveCredentials.js.map
 
 const hasFills = (node) => Boolean(node['fills']);
+//# sourceMappingURL=hasFills.js.map
 
 const hasStrokes = (node) => Boolean(node['strokes']);
+//# sourceMappingURL=hasStrokes.js.map
 
 //variables we will use to apply the right type of styles
 let colorStyles = false;
@@ -350,7 +363,7 @@ let lintFillText = { "type": "SOLID", "visible": true, "opacity": 1, "blendMode"
 let lintCount = 0;
 //count the number of nodes
 //TO DO: do this more accurately an array of ids
-let count = 0;
+let count = [];
 function applyTheme(themeData, theme) {
     var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -401,8 +414,15 @@ function applyTheme(themeData, theme) {
             selection.forEach(node => {
                 applyStyleToNode(node);
             });
+            //get unique
+            let actualCount = [...new Set(count)];
             //Msg to user
-            figma.notify(selectedTheme + ' theme applied');
+            if (actualCount.length > 0) {
+                figma.notify(selectedTheme + ' theme applied to ' + actualCount.length + ' layers');
+            }
+            else {
+                figma.notify('No styles from your themes were found.');
+            }
         }
         else {
             figma.notify('Please make a selection');
@@ -424,7 +444,7 @@ function applyStyleToNode(node) {
                     let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
                     if (matchedStyle !== null) {
                         node.fillStyleId = matchedStyle.id;
-                        count++;
+                        count.push(node.id);
                     }
                     //for text nodes that have mixed color styles, match and apply paint style
                 }
@@ -439,7 +459,7 @@ function applyStyleToNode(node) {
                         if (matchedStyle !== null) {
                             //apply the style to the correct range
                             node.setRangeFillStyleId(fillStyle.start, fillStyle.end, matchedStyle.id);
-                            count++;
+                            count.push(node.id);
                         }
                     });
                 }
@@ -452,7 +472,7 @@ function applyStyleToNode(node) {
                 let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
                 if (matchedStyle !== null) {
                     node.strokeStyleId = matchedStyle.id;
-                    count++;
+                    count.push(node.id);
                 }
             }
             //TEXT STYLES
@@ -470,7 +490,7 @@ function applyStyleToNode(node) {
                             'style': matchedStyle.fontName.style
                         });
                         node.textStyleId = matchedStyle.id;
-                        count++;
+                        count.push(node.id);
                     }
                     //do this for text nodes that have multiple text styles
                 }
@@ -490,7 +510,7 @@ function applyStyleToNode(node) {
                                 });
                                 //apply the style to the correct range
                                 node.setRangeTextStyleId(textStyle.start, textStyle.end, matchedStyle.id);
-                                count++;
+                                count.push(node.id);
                             }
                         }
                     }
@@ -509,10 +529,9 @@ function applyStyleToNode(node) {
                 let originalStyle = figma.getStyleById(node.effectStyleId);
                 //see if there is a matching style in the selected theme
                 let matchedStyle = returnMatchingStyle(originalStyle.name, 'EFFECT');
-                console.log('this shit is about to fail.');
                 if (matchedStyle !== null) {
                     node.effectStyleId = matchedStyle.id;
-                    count++;
+                    count.push(node.id);
                 }
             }
         }
@@ -616,10 +635,10 @@ function returnMatchingStyle(name, type) {
 //if not, return the full name
 function processStyleNameWithThemeNameIncluded(name, uniqueThemes) {
     let newName;
-    let splitName = name.split('/');
+    let splitName = name.toLowerCase().split('/');
     if (splitName.length >= 2) {
         uniqueThemes.forEach(theme => {
-            if (splitName[0].includes(theme)) {
+            if (splitName[0].includes(theme.toLowerCase())) {
                 splitName.shift();
                 newName = splitName.join('/').toString();
             }
@@ -707,3 +726,4 @@ figma.showUI(__html__, { width: 240, height: 312 });
         });
     }
 }))();
+//# sourceMappingURL=code.js.map

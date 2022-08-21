@@ -27,6 +27,8 @@
     //if the url is empty, we create a new empty bin
     function saveSettings() {
 
+        console.log($binURL);
+
         //loading state
         $loading = true;
 
@@ -49,6 +51,7 @@
                     //get the data about the new bin
                     let binId = responseData.metadata.id;
                     $binURL = $baseURL + binId;
+                    $themeData = responseData.record;
 
                     //send the data to figma to save to client storage + success msg
                     parent.postMessage({ pluginMessage: { 'type': 'saveCredentials', 'apiKey': $apiKey, 'binURL': $binURL} }, '*');
@@ -85,7 +88,7 @@
 
         //binurl is present, make sure its a json bin url
         //this could probably be more sophisticated but I am an idiot
-        } else if (!binURL.includes('https://api.jsonbin.io/v3/b/')) { 
+        } else if (!$binURL.includes('https://api.jsonbin.io/v3/b/')) { 
             
             //send a message to the user with error state
             parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Invalid bin url.'} }, '*');
@@ -99,8 +102,8 @@
         } else {
 
             //detect if this is an older jsonbin url
-            if (!apiURL.includes('https://api.jsonbin.io/v3/b')) {
-                apiURL.replace('https://api.jsonbin.io/b','https://api.jsonbin.io/v3/b');
+            if (!$binURL.includes('https://api.jsonbin.io/v3/b')) {
+                $binURL.replace('https://api.jsonbin.io/b','https://api.jsonbin.io/v3/b');
 				console.log('old json bin url, migrating to v3');
             }
 
@@ -114,10 +117,18 @@
                     let responseData = JSON.parse(req.responseText);
                     $themeData = responseData.record;
 
+                    //send error message to user
+                    parent.postMessage({ pluginMessage: { 'type': 'saveCredentials', 'apiKey': $apiKey, 'binURL': $binURL} }, '*');
+
                     //turn off the loading state with brief delay
                     setTimeout(() => {
                         $loading = false;
                     }, 200);
+
+                    //turn off the loading state with brief delay
+                    setTimeout(() => {
+                        $mainSection = 'themes';
+                    }, 500);
                 
                 } else if (req.status >= 400) { //if unsuccessful (2)
 
@@ -131,11 +142,6 @@
                     setTimeout(() => {
                         $loading = false;
                     }, 500);
-
-                    //turn off the loading state with brief delay
-                    setTimeout(() => {
-                        $mainSection = 'themes';
-                    }, 700);
 
                 }
             };

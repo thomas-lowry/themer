@@ -2,7 +2,7 @@
 
     //imports
     import cssVars from 'svelte-css-vars';
-    import { winHeight, deleteTheme, themeToDelete, selectedTheme, themeData, loading, binURL, apiKey } from '../scripts/stores.js';
+    import { winHeight, deleteTheme, themeToDelete, selectedTheme, themeData, loading, binURL, apiKey, reOrdered } from '../scripts/stores.js';
     import { Button, Type } from 'figma-plugin-ds-svelte';
 
     //ui visible
@@ -43,6 +43,7 @@
                 //parse the respond data as a JSON array, update them $themeDate
                 let responseData = JSON.parse(req.responseText);
                 $themeData = responseData.record;
+                $reOrdered = false;
             
             } else if (req.status >= 400) { //if unsuccessful
 
