@@ -21,6 +21,9 @@
 
         if (JSON.stringify($themeData) != '[{}]') {
 
+            //only do this if the list has not be re-ordered
+            //if the themes variable get repopulated it causes a weird glitch with svelte-dnd
+            //where the re-order re-animates and it is annoying
             if (!$reOrdered) {
 
                 themes = [];

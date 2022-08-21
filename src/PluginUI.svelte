@@ -98,11 +98,6 @@
 				//re-anable onboarding flow
 				$onboarding = true;
 
-				//disable loading (with slight delay)
-				setTimeout(() => {
-					$loading = false;
-				}, 200);
-
 				break;
 
 			//after an attempt to create a brand new bin

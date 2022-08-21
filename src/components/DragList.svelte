@@ -27,8 +27,6 @@
 		//create a temporary array
 		let themesWithNewOrder = [];
 
-		console.log('pre reorder:', $themeData);
-
 		itemsData.forEach(item => {
 			$themeData.forEach(theme => {
 				if(item.theme === theme.theme) {
@@ -36,8 +34,6 @@
 				}
 			})
 		});
-
-		console.log('after reorder:', themesWithNewOrder);
 
 		//stringify the results to send to JSONBin
 		themesWithNewOrder = JSON.stringify(themesWithNewOrder);
@@ -54,9 +50,6 @@
 				let responseData = JSON.parse(req.responseText);
 				$themeData = responseData.record;
 
-				console.log('response: ', responseData.record);
-
-			
 			} else if (req.status >= 400) { //if unsuccessful (2)
 
 				//send error message to user

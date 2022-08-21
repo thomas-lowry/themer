@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { readable } from 'svelte/store';
 import {windowWidth, windowHeight } from '../scripts/windowSize';
 
 //exports
@@ -7,6 +8,7 @@ export const apiKey = writable('');
 export const binURL = writable('');
 export const loading = writable(false);
 export const baseURL = writable('https://api.jsonbin.io/v3/b/');
+export const tutorialURL = readable('https://www.youtube.com');
 
 //CREATE THEME VARS
 

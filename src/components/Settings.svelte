@@ -3,7 +3,7 @@
 	//import Global CSS from the svelte boilerplate
 	//contains Figma color vars, spacing vars, utility classes and more
     import { GlobalCSS, Input, Label, IconKey, IconHyperlink, Button, IconButton } from 'figma-plugin-ds-svelte';
-    import { loading, winWidth, apiKey, binURL, mainSection, baseURL, themeData } from '../scripts/stores.js';
+    import { loading, winWidth, apiKey, binURL, mainSection, baseURL, themeData, tutorialURL } from '../scripts/stores.js';
     import HeaderGraphic from '../assets/header.svg';
     import IconHelp from '../assets/help.svg';
 
@@ -17,9 +17,6 @@
     //this function needs to reset values of key variables
     //and also pass a msg to Figma to clear the API and BIN values
     function resetThemer() {
-    
-        //immediately turn on the loading state
-        $loading = true;
 
         //reset onboarding data in Figma api
         parent.postMessage({ pluginMessage: { 'type': 'reset' } }, '*');
@@ -35,7 +32,7 @@
 
         //if the bin url is empty, we create a new bin
         //this will send an empty json dataset to jsonBin
-        if (binURL === '') {
+        if ($binURL === '') {
 
             //JSON bin needs an empty array for it to be valid
             let data = '[{}]';
@@ -103,7 +100,7 @@
 
             //detect if this is an older jsonbin url
             if (!apiURL.includes('https://api.jsonbin.io/v3/b')) {
-                apiURL.replace("https://api.jsonbin.io/b","https://api.jsonbin.io/v3/b");
+                apiURL.replace('https://api.jsonbin.io/b','https://api.jsonbin.io/v3/b');
 				console.log('old json bin url, migrating to v3');
             }
 
@@ -153,7 +150,7 @@
 
     //launch the video tutorial 
     function videoTutorial() {
-
+        window.open($tutorialURL, '_blank').focus();
     }
 
 
