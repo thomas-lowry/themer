@@ -66,9 +66,13 @@ figma.showUI(__html__, {width: 240, height: 312 });
 
 			//migration to new urls with jsonbin v3
 			if (!apiURL.includes('https://api.jsonbin.io/v3/b')) {
+
+				console.log('before:', apiURL);
 			
-				apiURL.replace("https://api.jsonbin.io/b","https://api.jsonbin.io/v3/b");
+				apiURL = apiURL.replace("https://api.jsonbin.io/b","https://api.jsonbin.io/v3/b");
 				console.log('old json bin url, migrating to v3');
+
+				console.log('after:', apiURL);
 
 				//save the data back to client storage
 				try {

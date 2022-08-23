@@ -27,7 +27,7 @@
             if (!$reOrdered) {
 
                 themes = [];
-                console.log('there is data');
+                //console.log('there is data');
 
                 //next we will populate an array of each individual
                 let uniqueThemes = [...new Set($themeData.map(item => item.theme))];

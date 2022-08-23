@@ -1,7 +1,6 @@
 export function assembleStylesArray(styles) {
     let reformatedArray = [];
 
-    console.log('pre reform:', styles);
 
     //Reformat array
     styles.forEach(style => {
@@ -12,16 +11,16 @@ export function assembleStylesArray(styles) {
             theme: '',
             type: style.type
         }
-        reformatedArray.push(item);
-    });
 
-    console.log('reform: ', reformatedArray);
+        let firstChar = item.name.charAt(0);
+        if(firstChar === '.' || '_') {
+            reformatedArray.push(item);
+        }
+    });
 
     //filter our duplicate entries
     let keys = reformatedArray.map(o => o.key)
     let filteredArray = reformatedArray.filter(({key}, index) => !keys.includes(key, index + 1))
-
-    console.log('filtered: ', filteredArray)
     
     return filteredArray;
 }

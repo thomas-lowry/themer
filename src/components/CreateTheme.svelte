@@ -4,6 +4,7 @@
     import { Button, Icon, IconButton, IconBack, IconTheme, Switch, Radio, Checkbox, Input, Type, Label } from 'figma-plugin-ds-svelte';
     import cssVars from 'svelte-css-vars';
     import { step, styleSource, styleTypeColor, styleTypeText, styleTypeEffect, winWidth, createThemeUI, loading, themeData, binURL, apiKey, mainSection } from '../scripts/stores.js';
+    import { jsonSize } from '../scripts/jsonSize.js';
 
     //var to store the raw style data we get back from Figma before processing it into theme data to store in JSON BIn
     //the UI will need to populate the "theme" property of each object depending on what the user decides
@@ -332,7 +333,8 @@
                 if (!isDuplicate(style, cleanData)) { cleanData.push(style) }
             }
 
-            console.log('clean data: ', cleanData);
+            //get the size of the json KB
+            let size = jsonSize(cleanData);
 
             //stringify the data to send
             cleanData = JSON.stringify(cleanData);
@@ -367,9 +369,31 @@
 
                     //send user to the settings page
                     $mainSection = 'settings';
+
+                    //display the correct error msg
+                    let msg;
+                    if (req.status === 400) {
+                        msg = 'Bad request. Check your bin URL or try resetting Themer. Copy your API key first!';
+                    } else if (req.status === 401) {
+                        msg = 'Error connecting. Please check that your API key is correct';
+                    } else if (req.status === 403) {
+
+                        if(size > 100) {
+                            msg = 'Data size is over 100kb. You may need to upgrade jsonbin.io to the pro plan';
+                        } else if (size > 1024) {
+                            msg = 'Data size is over 1mb. You may need to purchase additional requests from jsonbin.io';
+                        } else {
+                            msg = 'You may have exceeded alloted number of requests allowed on your jsonbin.io plan.';
+                        }
+                        
+                    } else if (eq.status === 404) {
+                        msg = 'Bin not found. Please check your URL';
+                    } else {
+                        msg = 'An unknown error has occurred connecting to jsonbin.io';
+                    }
                     
                     //send error message to user
-                    parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': 'Connection to JSONBin failed. Double check your API key.'} }, '*');
+                    parent.postMessage({ pluginMessage: { 'type': 'notify', 'message': msg} }, '*');
 
                     //turn off the loading state with brief delay
                     setTimeout(() => {
