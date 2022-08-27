@@ -18,10 +18,10 @@ let stylesInTheme = []; //just the styles in the theme we are applying
 let selectedTheme; //name of the theme we are applying
 
 //linting mode
-let lint = false;
-let lintFill:Paint = { "type": "SOLID", "visible": true, "opacity": 1, "blendMode": "NORMAL", "color": { "r": 1,"g": 0,"b": 1 } } //fuchsia
-let lintFillText:Paint = { "type": "SOLID", "visible": true, "opacity": 1, "blendMode": "NORMAL", "color": { "r": 0.6705882549285889,"g": 0,"b": 0.6705882549285889 } }
-let lintCount = 0;
+// let lint = false;
+// let lintFill:Paint = { "type": "SOLID", "visible": true, "opacity": 1, "blendMode": "NORMAL", "color": { "r": 1,"g": 0,"b": 1 } } //fuchsia
+// let lintFillText:Paint = { "type": "SOLID", "visible": true, "opacity": 1, "blendMode": "NORMAL", "color": { "r": 0.6705882549285889,"g": 0,"b": 0.6705882549285889 } }
+// let lintCount = 0;
 
 //count the number of nodes
 //TO DO: do this more accurately an array of ids
@@ -216,89 +216,89 @@ async function applyStyleToNode(node:SceneNode) {
 }
 
 //special function for linting
-export function lintSelection() {
+// export function lintSelection() {
 
-    lint = true;
+//     lint = true;
 
-    //get for selection
-    let selection = figma.currentPage.selection;
+//     //get for selection
+//     let selection = figma.currentPage.selection;
 
-    //check for selection
-    if (selection.length >= 1) {
+//     //check for selection
+//     if (selection.length >= 1) {
 
-        //now we iterate through every node in the selection
-        selection.forEach(node => {
-            lintNode(node);
-        })
+//         //now we iterate through every node in the selection
+//         selection.forEach(node => {
+//             lintNode(node);
+//         })
 
-        //Msg to user
-        figma.notify('Found ' + lintCount + ' layers without styles.');
+//         //Msg to user
+//         figma.notify('Found ' + lintCount + ' layers without styles.');
 
-    } else {
-        figma.notify('Please make a selection');
-    }
+//     } else {
+//         figma.notify('Please make a selection');
+//     }
 
-}
+// }
 
 //apply linting styles
-function lintNode(node) {
+// function lintNode(node) {
 
-    //handle normal color nodes
-    if (hasFills(node) && node.fillStyleId ==='' && typeof(node.fills) !== 'symbol') {
+//     //handle normal color nodes
+//     if (hasFills(node) && node.fillStyleId ==='' && typeof(node.fills) !== 'symbol') {
 
-        if(node.fills.length >= 1 && node.fills[0].visible === true) {
-            if (node.fills.length === 1) {
-                let newFills = [...node.fills];
+//         if(node.fills.length >= 1 && node.fills[0].visible === true) {
+//             if (node.fills.length === 1) {
+//                 let newFills = [...node.fills];
 
-                if (node.type === 'TEXT') {
-                    newFills.push(lintFillText);
-                } else {
-                    newFills.push(lintFill);
-                }
-                node.fills = newFills;
-            }
-        }
+//                 if (node.type === 'TEXT') {
+//                     newFills.push(lintFillText);
+//                 } else {
+//                     newFills.push(lintFill);
+//                 }
+//                 node.fills = newFills;
+//             }
+//         }
 
-    } else if (node.type ==='TEXT' && typeof(node.fills) === 'symbol') {
+//     } else if (node.type ==='TEXT' && typeof(node.fills) === 'symbol') {
 
-        //do this if there are multiple text styles in the same text box
-        let uniqueTextFills = node.getStyledTextSegments(['fills', 'fillStyleId']);
+//         //do this if there are multiple text styles in the same text box
+//         let uniqueTextFills = node.getStyledTextSegments(['fills', 'fillStyleId']);
 
-        uniqueTextFills.forEach(fill => {
+//         uniqueTextFills.forEach(fill => {
 
-            if (fill.fillStyleId === '') {
-                let newFills = [...node.fills];
-                newFills.push(lintFillText);
-                node.fills = newFills;
-                node.setRangeFills(fill.start, fill.end, newFills);
-            }
+//             if (fill.fillStyleId === '') {
+//                 let newFills = [...node.fills];
+//                 newFills.push(lintFillText);
+//                 node.fills = newFills;
+//                 node.setRangeFills(fill.start, fill.end, newFills);
+//             }
 
-        });
+//         });
 
-    }
+//     }
 
-    //handle strokes
-    if (hasStrokes(node) && node.strokeStyleId ==='') {
+//     //handle strokes
+//     if (hasStrokes(node) && node.strokeStyleId ==='') {
 
-        if(node.strokes.length > 0) {
-            if (node.strokes.length === 1 && node.strokes[0].visible === true) {
-                let newFills = [...node.strokes];
-                newFills.push(lintFill);
-                node.strokes = newFills;
-            }
-        }
+//         if(node.strokes.length > 0) {
+//             if (node.strokes.length === 1 && node.strokes[0].visible === true) {
+//                 let newFills = [...node.strokes];
+//                 newFills.push(lintFill);
+//                 node.strokes = newFills;
+//             }
+//         }
 
-    }
+//     }
 
-    //repeat the process for all children
-    if (hasChildren(node)) {
-        if(node.children.length >= 1) {
-            node.children.forEach(child => {
-                lintNode(child);
-            })
-        }
-    }
-}
+//     //repeat the process for all children
+//     if (hasChildren(node)) {
+//         if(node.children.length >= 1) {
+//             node.children.forEach(child => {
+//                 lintNode(child);
+//             })
+//         }
+//     }
+// }
 
 //HELPERS
 
