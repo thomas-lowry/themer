@@ -2,7 +2,7 @@
 import { getStyleData } from './scripts/getStyleData';
 import { resetThemer } from './scripts/resetThemer';
 import { saveCredentials } from './scripts/saveCredentials';
-import { applyTheme, lintSelection } from './scripts/applyTheme';
+import { applyTheme } from './scripts/applyTheme';
 
 //api credentials
 var apiSecret:string;
@@ -16,11 +16,6 @@ figma.ui.onmessage = msg => {
 		//apply theme to selection
 		case 'applyTheme':
 			applyTheme(msg.themeData, msg.theme);
-		break;
-
-		//lint selection
-		case 'lintSelection':
-			lintSelection();
 		break;
 
 		//when the UI needs Figma to gather data to create a new theme, this function is executed

@@ -7,7 +7,7 @@
     "start": "sirv public"
   },
   "devDependencies": {
-    "@figma/plugin-typings": "^1.50.0",
+    "@figma/plugin-typings": "^1.51.0",
     "@rollup/plugin-commonjs": "^11.1.0",
     "@rollup/plugin-image": "^2.0.5",
     "@rollup/plugin-node-resolve": "^6.1.0",
