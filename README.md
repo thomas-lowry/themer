@@ -1,23 +1,49 @@
-![Themer promo image](img/themer-banner-v2.0-github.png?raw=true "Themer promo")
+# Figsvelte
+A boilerplate for creating Figma plugins using Svelte.
 
-# Themer
-Themer enables you to create and swap themes from your *published* styles in your team library. Use it for color, text and effect styles.
+This starter project has everything you need to start developing a Figma plugin usign Svelte. Your JS, CSS, SVG and image assets can be bundled on build. The package will take care of compiling your typescript + app on save during development, and also minify on build. 
 
-### How to use:
-Themer associates a list of styles with a theme name. When you have multiple themes, Themer will swap styles which share the same style names across themes.
+Additionally, this package comes preconfigured with [Figma Plugin DS Svelte](https://github.com/thomas-lowry/figma-plugin-ds-svelte) where you have access to a large range of components and icons that match the Figma UI, to get you up and running quickly. Note: installing this boilerplate will install the component library as a dependency.
 
-In order for Themer to be used across your team, generic information about your styles is shared on a service external to Figma called jsonbin.io. You will need an account with an API key to get started. The onboarding in Themer will get you setup.
+Only what you import/use will be included in the final build for small bundle size.
 
-1. Insert your API key from JSONbin
 
-2. Create your first theme with a unique name, you can pull all local styles, gather styles from a selection, or even an entire page. 
+## To get started
+```bash
+npx degit thomas-lowry/figsvelte figma-plugin
+cd figma-plugin
+npm install
+```
+_Note that you will need to have [Node.js](https://nodejs.org/) installed._
 
-*Tip*: If all of your styles exist within one document, you can also prefix your style names with 'theme1/' or 'theme2/' and set Themer to generate multiuple themes at once.
 
-3. With your themes created, you can now apply them to a selection or the entire page. Remember, your design must make use of the same styles from one of the themes to work.
+## Development
+During development, watch your project for changes with the following command.
 
-### Privacy:
-Themer stores information about your styles at a service esternal to Figma. For each theme, we store the name of the theme, the name of the style, the type of style (color, text, effect), and a unique key required to import your styles into a document from your team library. No other data from your file is sent to Jsonbin. Your unique API key is storred locally as well, so if you use Themer across devices, between team members, or between Figma Desktop and Figma in the browser, you will need to re-enter your API key and your Bin URL so that everyone/everywhere has access to the same list of Themes.
+```bash
+npm run dev
+```
+Start building your plugin UI in `'src/Plugin.svelte'`.
 
-### Roadmap:
-• Currently Themer does not yet work text boxes which contan multiple text styles, the plan is to enable this in the near future
+
+## Build
+When ready to package up your final Figma Plugin:
+```bash
+npm run build
+```
+
+
+## Useful info
+To include an external CSS file:
+```javascript
+import styles from './styles.css';
+```
+
+To include an SVG:
+```javascript
+import SvgName from './image.svg';
+
+//use in your markup
+{@html SvgName}
+```
+_For more info on using the Icon component system with SVGs from [Figma Plugin DS Svelte](https://github.com/thomas-lowry/figma-plugin-ds-svelte), refer to the repo._

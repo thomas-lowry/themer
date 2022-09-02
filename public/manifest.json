@@ -1,0 +1,8 @@
+{
+  "name": "Themer",
+  "id": "731176732337510831",
+  "api": "1.0.0",
+  "editorType": ["figma"],
+  "main": "code.js",
+  "ui": "index.html"
+}

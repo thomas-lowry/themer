@@ -1,0 +1,9 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M17.6066 10.7071C17.9971 10.3166 18.6303 10.3166 19.0208 10.7071L21.1421 12.8284C21.5327 13.2189 21.5327 13.8521 21.1421 14.2426L18.3848 17H16.9706L20.435 13.5355L18.3137 11.4142L15 14.7279V13.3137L17.6066 10.7071Z" fill="var(--figma-color-icon-secondary)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M13 10H10L10 22H13V10ZM10 9C9.44772 9 9 9.44772 9 10V22C9 22.5523 9.44772 23 10 23H13C13.5523 23 14 22.5523 14 22V10C14 9.44772 13.5523 9 13 9H10Z" fill="var(--figma-color-icon-secondary)"/>
+<path d="M10.75 20.5C10.75 20.0858 11.0858 19.75 11.5 19.75V19.75C11.9142 19.75 12.25 20.0858 12.25 20.5V20.5C12.25 20.9142 11.9142 21.25 11.5 21.25V21.25C11.0858 21.25 10.75 20.9142 10.75 20.5V20.5Z" fill="var(--figma-color-icon-secondary)"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M22 19V22L15 22V23L22 23C22.5523 23 23 22.5523 23 22V19C23 18.4477 22.5523 18 22 18H15V19L22 19Z" fill="var(--figma-color-icon-secondary)"/>
+<rect x="10" y="10" width="3" height="3" fill="#189FFB"/>
+<rect x="10" y="13" width="3" height="3" fill="#A8CDEC"/>
+<rect x="10" y="16" width="3" height="3" fill="#DAEBF7"/>
+</svg>
