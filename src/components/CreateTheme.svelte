@@ -432,7 +432,7 @@
     <!-- Header -->
     <div class="header flex row align-items-center">
         <IconButton on:click={() => $createThemeUI = false} iconName={IconBack} class="ml-xxxsmall mr-xxxsmall"/>
-        <Type color="black8">Create new theme</Type>
+        <Type color="--figma-color-text">Create new theme</Type>
     </div>
 
     <!-- Step -->
@@ -483,7 +483,7 @@
 
                 {#if prefixedStyleNames === true}
                     <div class="flex column pl-medium">
-                    <Type color="blue">
+                    <Type color="--figma-color-text-secondary">
                         Themer will create {uniqueThemeNamesFromPrefixes.length} 
                         {#if uniqueThemeNamesFromPrefixes.length > 1}
                             themes
@@ -528,14 +528,14 @@
     left: var(--uiLeft);
     width: 100%;
     height: calc(100% - 2px);
-    background-color: var(--white);
+    background-color: var(--figma-color-bg);
     transition: left 200ms ease-out;
     z-index: 100;
 }
 
 .header {
    height: 42px;
-   box-shadow: 0px 1px 0px var(--black1);
+   box-shadow: 0px 1px 0px var(--figma-color-border);
 }
 
 .content {
@@ -564,12 +564,13 @@
 
 .step {
    height: 40px;
-   box-shadow: 0px 2px 0px var(--black1);
-   box-shadow: 0px -1px 0px var(--black1);
+   box-shadow: 0px 2px 0px var(--figma-color-border);
+   box-shadow: 0px -1px 0px var(--figma-color-border);
    padding-left: 14px;
    padding-right: 16px;
    position: relative;
-   background-color: #EDF5FA;
+   color: var(--figma-color-text);
+   background-color: var(--figma-color-bg-secondary);
 }
 
 .step__number {
@@ -579,8 +580,8 @@
     font-size: var(--font-size-xsmall);
     line-height: var(--font-line-height);
     font-weight: var(--font-weight-bold);
-    color: var(--white);
-    background-color: var(--blue);
+    color: var(--figma-color-text-onbrand);
+    background-color: var(--figma-color-bg-brand);
     border-radius: 8px;
     margin-right: 10px;
 }
@@ -604,14 +605,14 @@
     font-size: var(--font-size-xsmall);
     line-height: var(--font-line-height);
     font-weight: var(--font-weight-normal);
-    color: var(--black8);
+    color: var(--figma-color-text);
     height: 40px;
     display: flex;
     align-items: center;
 }
 
 .footer {
-    box-shadow: 0px -1px 0px var(--black1);
+    box-shadow: 0px -1px 0px var(--figma-color-border);
     height: 48px;
 }
 
@@ -626,12 +627,12 @@
     width: 8px;
     height: 8px;
     margin-right: 8px;
-    background-color: var(--black1);
+    background-color: var(--figma-color-icon-tertiary);
     border-radius: 4px;
 }
 
 .pager__dot--active {
-    background-color: var(--blue);
+    background-color: var(--figma-color-bg-brand);
 }
 
 

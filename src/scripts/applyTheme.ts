@@ -14,7 +14,7 @@ let allThemes = [];
 let selectedTheme; //name of the theme we are applying
 
 //collect the number of nodes affected
-const count = {};
+let count = {};
 
 //collect the styles applied so we don't import them twice
 const styles = {};
@@ -62,6 +62,8 @@ export async function applyTheme(themeData, theme) {
         } else {
             figma.notify('No styles from your themes were found.');
         }
+
+        count = {};
 
     } else {
         figma.notify('Please make a selection');

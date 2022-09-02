@@ -195,7 +195,7 @@
 .header {
     position: relative;
     padding-top: 1px;
-    box-shadow: 0px 1px 0px var(--black1);
+    box-shadow: 0px 1px 0px var(--figma-color-border);
 
 }
 
@@ -211,7 +211,7 @@
 }
 
 .footer {
-    border-top: 1px solid var(--black1);
+    border-top: 1px solid var(--figma-color-border);
     height:var(--size-xlarge);
 }
 

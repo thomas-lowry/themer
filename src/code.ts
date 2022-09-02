@@ -43,7 +43,7 @@ figma.ui.onmessage = msg => {
 };
 
 // show the UI
-figma.showUI(__html__, {width: 240, height: 312 });
+figma.showUI(__html__, {themeColors: true, width: 240, height: 312 });
 
 
 //INITIALIZE PLUGIN

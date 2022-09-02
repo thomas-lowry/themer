@@ -362,7 +362,7 @@ let effectStyles = false;
 let allThemes = [];
 let selectedTheme; //name of the theme we are applying
 //collect the number of nodes affected
-const count = {};
+let count = {};
 //collect the styles applied so we don't import them twice
 const styles$1 = {};
 //notifications
@@ -405,6 +405,7 @@ function applyTheme(themeData, theme) {
             else {
                 figma.notify('No styles from your themes were found.');
             }
+            count = {};
         }
         else {
             figma.notify('Please make a selection');
@@ -609,7 +610,7 @@ figma.ui.onmessage = msg => {
     }
 };
 // show the UI
-figma.showUI(__html__, { width: 240, height: 312 });
+figma.showUI(__html__, { themeColors: true, width: 240, height: 312 });
 //INITIALIZE PLUGIN
 //Check to see if credentials exist in client storage
 //we check to see if there is an API key for jsonbin and also a url to the bin

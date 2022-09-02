@@ -126,11 +126,11 @@
 .themelist::-webkit-scrollbar-thumb {
     border: solid 3px transparent;
     border-radius: 6px;
-    box-shadow: inset 0 0 10px 10px rgba(0,0,0,.3);
+    box-shadow: inset 0 0 10px 10px var(--figma-color-icon-tertiary);
 }
 
 .footer {
-    border-top: 1px solid var(--black1);
+    border-top: 1px solid var(--figma-color-border);
     height:var(--size-xlarge);
 }
 

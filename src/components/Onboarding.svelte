@@ -285,7 +285,7 @@
     left: 0;
     height: 100%;
     width: 100%;
-    background-color: var(--white);
+    background-color: var(--figma-color-bg);
     transition: top 200ms ease-out;
     z-index: 100;
 }
@@ -313,7 +313,7 @@
 
 .illustration {
     position: relative;
-    border-bottom: 1px solid var(--black1);
+    border-bottom: 1px solid var(--figma-color-border);
 }
 
 .api-key-input {
@@ -328,9 +328,12 @@
     margin: 0 auto 0 auto;
 }
 
-.link {
-    color: var(--blue);
+a, .link {
+    color: var(--figma-color-text-brand);
     cursor: pointer;
+}
+a:visited {
+    color: var(--figma-color-text-brand);
 }
 
 </style>

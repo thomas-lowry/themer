@@ -19,7 +19,7 @@
 <style>
 
 .tab-container {
-    box-shadow: 0px 1px 0px var(--black1);
+    box-shadow: 0px 1px 0px var(--figma-color-border);
     height: 41px;
 }
 
@@ -29,18 +29,18 @@
     line-height: var(--font-line-height);
     font-weight: var(--font-weight-medium);
     letter-spacing: var(--font-letter-spacing-pos-small);
-    color: var(--black3);
+    color: var(--figma-color-text-secondary);
     padding-right: var(--size-xsmall);
     cursor: default;
     user-select: none;
 }
 
 .tab:hover {
-    color: var(--black8);
+    color: var(--figma-color-text);
 }
 
 .active {
-    color: var(--black8);
+    color: var(--figma-color-text);
 }
 
 

@@ -53,7 +53,7 @@
                 //turn off the loading state with brief delay
                 setTimeout(() => {
                     $loading = false;
-                }, 200);
+                }, 400);
 
             }
         };
@@ -83,13 +83,13 @@
     <div class="p-xsmall">
 
         <!-- Heading -->
-        <Type size="large" weight="medium" class="mb-xsmall">Delete theme</Type>
+        <Type size="medium" weight="medium" class="mb-xsmall">Delete theme</Type>
 
         <!-- Message to user -->
-        <Type size="small" class="mb-xxsmall">Are you sure you want to delete the <strong>{$themeToDelete}</strong> theme?</Type>
+        <Type size="xsmall" class="mb-xxsmall">Are you sure you want to delete the <strong>{$themeToDelete}</strong> theme?</Type>
 
         <!-- Warning -->
-        <Type size="small" color="black3"  class="mb-small">You cannot undo this action.</Type>
+        <Type size="xsmall" color="--figma-color-text-secondary"  class="mb-small">You cannot undo this action.</Type>
 
         <!-- Actions -->
         <div class="flex justify-content-start">
@@ -109,7 +109,7 @@
     left: 0;
     width: 100%;
     height: calc(100% - 2px);
-    background-color: var(--white);
+    background-color: var(--figma-color-bg);
     transition: top 200ms ease-out;
     z-index: 100;
 }

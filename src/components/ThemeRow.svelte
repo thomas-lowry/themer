@@ -38,7 +38,7 @@
     outline: 1px solid transparent;
 }
 .themeRow:hover {
-    outline: 1px solid var(--blue);
+    outline: 1px solid var(--figma-color-border-selected);
     outline-offset: -1px;
 }
 
@@ -51,7 +51,7 @@
 }
 
 .selected {
-    background-color: var(--selection-b);
+    background-color: var(--figma-color-bg-selected);
 }
 
 .name {
@@ -63,6 +63,7 @@
     line-height: var(--font-line-height);
     font-weight: var(--font-weight-normal);
     letter-spacing: var(--font-letter-spacing-pos-small);
+    color: var(--figma-color-text);
 }
 
 .themeRow:hover .actions {

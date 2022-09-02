@@ -39,7 +39,7 @@ function changeStep(direction) {
 <style>
 
 .container {
-    border-top: 1px solid var(--black1);
+    border-top: 1px solid var(--figma-color-border);
     height: calc(var(--size-large) + 1px);
 }
 
@@ -47,7 +47,7 @@ function changeStep(direction) {
     height: var(--size-xxsmall);
     width: var(--size-xxsmall);
     margin-right: var(--size-xxsmall);
-    background-color: var(--black3);
+    background-color: var(--figma-color-icon-tertiary);
     border-radius: 50%;
 }
 
@@ -57,7 +57,7 @@ function changeStep(direction) {
 }
 
 .selected {
-    background-color: var(--blue);
+    background-color: var(--figma-color-bg-brand);
 }
 .steps:last-child {
     margin-right: 0px;

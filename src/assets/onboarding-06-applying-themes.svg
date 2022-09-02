@@ -1,11 +1,11 @@
 <svg width="240" height="120" viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_1296_2625)">
-<rect width="240" height="120" fill="#F5F5F5"/>
+<rect width="240" height="120" fill="var(--figma-color-bg-secondary)"/>
 <rect x="94.5" y="14.5" width="50" height="90" stroke="#189FFB"/>
-<rect x="93.5" y="13.5" width="2" height="2" fill="white" stroke="#189FFB"/>
-<rect x="93.5" y="103.5" width="2" height="2" fill="white" stroke="#189FFB"/>
-<rect x="143.5" y="13.5" width="2" height="2" fill="white" stroke="#189FFB"/>
-<rect x="143.5" y="103.5" width="2" height="2" fill="white" stroke="#189FFB"/>
+<rect x="93.5" y="13.5" width="2" height="2" fill="var(--figma-color-bg)" stroke="#189FFB"/>
+<rect x="93.5" y="103.5" width="2" height="2" fill="var(--figma-color-bg)" stroke="#189FFB"/>
+<rect x="143.5" y="13.5" width="2" height="2" fill="var(--figma-color-bg)" stroke="#189FFB"/>
+<rect x="143.5" y="103.5" width="2" height="2" fill="var(--figma-color-bg)" stroke="#189FFB"/>
 <rect x="101" y="21" width="37" height="77" fill="#3F3F3F"/>
 <rect x="101" y="28" width="37" height="18" fill="black"/>
 <rect x="101" y="80" width="37" height="18" fill="#1B1B1B"/>
@@ -89,19 +89,19 @@
 <rect x="54" y="55" width="9" height="1" fill="#6F6F6F"/>
 <rect x="65" y="55" width="9" height="1" fill="#6F6F6F"/>
 <g filter="url(#filter0_d_1296_2625)">
-<rect x="162" y="34" width="40" height="52" fill="white"/>
+<rect x="162" y="34" width="40" height="52" fill="var(--figma-color-bg)"/>
 </g>
 <rect x="165" y="37" width="4" height="4" fill="#0D99FF"/>
 <rect x="187" y="77" width="12" height="6" rx="0.680344" fill="#189FFB"/>
-<path d="M197 37L198.5 38.5M200 40L198.5 38.5M198.5 38.5L200 37L197 40" stroke="black" stroke-width="0.5"/>
-<rect x="162" y="44" width="40" height="1" fill="#D9D9D9"/>
-<rect x="162" y="48" width="40" height="8" fill="#DAEBF7"/>
-<rect x="165.5" y="50.5" width="3" height="3" stroke="#0B0B0B" stroke-opacity="0.4"/>
-<rect x="165.5" y="58.5" width="3" height="3" stroke="#0B0B0B" stroke-opacity="0.4"/>
-<rect x="165.5" y="66.5" width="3" height="3" stroke="#0B0B0B" stroke-opacity="0.4"/>
-<rect x="171" y="51" width="16" height="2" rx="1" fill="#879199"/>
-<rect x="171" y="59" width="20" height="2" rx="1" fill="#D9D9D9"/>
-<rect x="171" y="67" width="14" height="2" rx="1" fill="#D9D9D9"/>
+<path d="M197 37L198.5 38.5M200 40L198.5 38.5M198.5 38.5L200 37L197 40" stroke="var(--figma-color-icon)" stroke-width="0.5"/>
+<rect x="162" y="44" width="40" height="1" fill="var(--figma-color-border)"/>
+<rect x="162" y="48" width="40" height="8" fill="var(--figma-color-bg-selected-tertiary)"/>
+<rect x="165.5" y="50.5" width="3" height="3" stroke="var(--figma-color-icon)" stroke-opacity="0.4"/>
+<rect x="165.5" y="58.5" width="3" height="3" stroke="var(--figma-color-icon)" stroke-opacity="0.4"/>
+<rect x="165.5" y="66.5" width="3" height="3" stroke="var(--figma-color-icon)" stroke-opacity="0.4"/>
+<rect x="171" y="51" width="16" height="2" rx="1" fill="var(--figma-color-text)"/>
+<rect x="171" y="59" width="20" height="2" rx="1" fill="var(--figma-color-text-secondary)"/>
+<rect x="171" y="67" width="14" height="2" rx="1" fill="var(--figma-color-text-secondary)"/>
 <g filter="url(#filter1_d_1296_2625)">
 <path d="M193 79V95.015L196.225 91.8836L198.479 97.2243L202.084 95.6893L199.984 90.619H204.591L193 79Z" fill="white"/>
 <path d="M194 92.5951V81.4071L202.165 89.5901H198.471L200.751 95.0086L198.907 95.7826L196.537 90.1458L194 92.5951Z" fill="black"/>
