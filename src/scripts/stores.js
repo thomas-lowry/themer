@@ -8,7 +8,7 @@ export const apiKey = writable('');
 export const binURL = writable('');
 export const loading = writable(false);
 export const baseURL = writable('https://api.jsonbin.io/v3/b/');
-export const tutorialURL = readable('https://www.youtube.com');
+export const tutorialURL = readable('https://youtu.be/xOPZ2oGdQFo');
 
 //CREATE THEME VARS
 
