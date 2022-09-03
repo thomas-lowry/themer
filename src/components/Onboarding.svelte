@@ -187,7 +187,7 @@
                     </div>
                     <!-- content -->
                     <Type size="xsmall" class="mb-xxsmall">This onboarding guide will help you get up and running with Themer.</Type>
-                    <Type size="xsmall"><a href="http://www.youtube.com" target="_blank">Watch the tutorial</a> which will walk you through how to setup the plugin, or skip ahead to the <span on:click={() => goToSettings()} class="link">settings screen</span>, if you already have a config.</Type>
+                    <Type size="xsmall"><a href="{$tutorialURL}" target="_blank">Watch the tutorial</a> which will walk you through how to setup the plugin, or skip ahead to the <span on:click={() => goToSettings()} class="link">settings screen</span>, if you already have a config.</Type>
                 </div>
             </div>
 

@@ -3,7 +3,7 @@
     //imports
     import { Button, Icon, IconButton, IconBack, IconTheme, Switch, Radio, Checkbox, Input, Type, Label } from 'figma-plugin-ds-svelte';
     import cssVars from 'svelte-css-vars';
-    import { step, styleSource, styleTypeColor, styleTypeText, styleTypeEffect, winWidth, createThemeUI, loading, themeData, binURL, apiKey, mainSection } from '../scripts/stores.js';
+    import { step, styleSource, styleTypeColor, styleTypeText, styleTypeEffect, winWidth, createThemeUI, loading, themeData, binURL, apiKey, mainSection, reOrdered } from '../scripts/stores.js';
     import { jsonSize } from '../scripts/jsonSize.js';
 
     //var to store the raw style data we get back from Figma before processing it into theme data to store in JSON BIn
@@ -350,6 +350,7 @@
                     //parse the respond data as a JSON array, update them $themeDate
                     let responseData = JSON.parse(req.responseText);
                     $themeData = responseData.record;
+                    $reOrdered = false;
 
                     //reset create theme UI for the next time
                     $createThemeUI = false;
