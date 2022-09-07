@@ -27,7 +27,7 @@ export async function applyTheme(themeData, theme) {
     //tell the user the theme is being applied
     notify = figma.notify('Applying ' + theme + ' theme...', {timeout: Infinity})
 
-    selectedTheme = theme;
+    selectedTheme = theme.toLowerCase();
 
     //all of the theme data which includes the keys, provided from the JSONbin
     allThemes = themeData;
@@ -220,10 +220,15 @@ async function applyStyleToNode(node: SceneNode) {
 function returnMatchingStyle(name, type) {
 
     //make an array of all of the unique theme names
-    let uniqueThemes = [...new Set(allThemes.map(item => item.theme))];
+    let uniqueThemes = [...new Set(allThemes.map(item => item.theme.toLowerCase()))];
+    console.log('unique', uniqueThemes);
+
+    console.log('OG style name before:', name);
 
     //normalize style name for matching
     let normalizedCurrentStyleName = processStyleNameWithThemeNameIncluded(name, uniqueThemes);
+
+    console.log('processed style name:', normalizedCurrentStyleName);
 
     let match = null;
 
@@ -233,6 +238,7 @@ function returnMatchingStyle(name, type) {
         let normalizedNewStyleName = processStyleNameWithThemeNameIncluded(style.name, uniqueThemes);
         if (normalizedNewStyleName === normalizedCurrentStyleName && style.type === type && style.theme === selectedTheme) {
             match = style;
+            return match;
         }
     });
 
@@ -247,6 +253,8 @@ function returnMatchingStyle(name, type) {
 function processStyleNameWithThemeNameIncluded(name, uniqueThemes) {
     let newName;
     let splitName = name.toLowerCase().split('/');
+
+    console.log('split name:', splitName)
 
     if (splitName.length >= 2) {
         uniqueThemes.forEach(theme => {

@@ -184,7 +184,7 @@
 
     <div class="footer flex pr-xsmall pl-xsmall align-items-center justify-content-between">
         <Button variant='primary' on:click={() => saveSettings()} disabled={$apiKey === ''}>Save</Button>
-        <Button variant='tertiary' on:click={() => resetThemer()}>Reset Themer</Button>
+        <Button variant='tertiary' destructive=true on:click={() => resetThemer()}>Reset Themer</Button>
     </div>
 
     </div>

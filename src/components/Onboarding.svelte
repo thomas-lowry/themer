@@ -16,7 +16,6 @@
 
     //function to skip onboarding
     function skip() {
-
         if ($apiKey === '' || $binURL === '') {
             $mainSection = 'settings';
         } else {
@@ -24,7 +23,6 @@
         }
 
         $onboarding = false;
-
     }
 
     //vars

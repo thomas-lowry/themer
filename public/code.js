@@ -360,7 +360,7 @@ function applyTheme(themeData, theme) {
     return __awaiter(this, void 0, void 0, function* () {
         //tell the user the theme is being applied
         notify = figma.notify('Applying ' + theme + ' theme...', { timeout: Infinity });
-        selectedTheme = theme;
+        selectedTheme = theme.toLowerCase();
         //all of the theme data which includes the keys, provided from the JSONbin
         allThemes = themeData;
         //get for selection
@@ -538,15 +538,19 @@ function applyStyleToNode(node) {
 //find a matching style in the selected theme
 function returnMatchingStyle(name, type) {
     //make an array of all of the unique theme names
-    let uniqueThemes = [...new Set(allThemes.map(item => item.theme))];
+    let uniqueThemes = [...new Set(allThemes.map(item => item.theme.toLowerCase()))];
+    console.log('unique', uniqueThemes);
+    console.log('OG style name before:', name);
     //normalize style name for matching
     let normalizedCurrentStyleName = processStyleNameWithThemeNameIncluded(name, uniqueThemes);
+    console.log('processed style name:', normalizedCurrentStyleName);
     let match = null;
     //iterate through all styles
     allThemes.forEach(style => {
         let normalizedNewStyleName = processStyleNameWithThemeNameIncluded(style.name, uniqueThemes);
         if (normalizedNewStyleName === normalizedCurrentStyleName && style.type === type && style.theme === selectedTheme) {
             match = style;
+            return match;
         }
     });
     return match;
@@ -558,6 +562,7 @@ function returnMatchingStyle(name, type) {
 function processStyleNameWithThemeNameIncluded(name, uniqueThemes) {
     let newName;
     let splitName = name.toLowerCase().split('/');
+    console.log('split name:', splitName);
     if (splitName.length >= 2) {
         uniqueThemes.forEach(theme => {
             if (splitName[0].includes(theme.toLowerCase())) {
