@@ -23,7 +23,12 @@ const styles = {};
 //notifications
 let notify;
 
+//failed styles
+let failedStyles = {};
+
 export async function applyTheme(themeData, theme) {
+
+    failedStyles = {};
 
     //tell the user the theme is being applied
     notify = figma.notify('Applying ' + theme + ' theme...', {timeout: Infinity})
@@ -34,6 +39,8 @@ export async function applyTheme(themeData, theme) {
 
     //all of the theme data which includes the keys, provided from the JSONbin
     allThemes = themeData;
+
+    console.log('all themes: ', allThemes)
 
     //filter all of the theme data down to just the styles associated with the selected theme
     selectedThemeStyles = themeData.filter(style => style.theme.toLowerCase() === selectedTheme);
@@ -63,9 +70,23 @@ export async function applyTheme(themeData, theme) {
         //cancel the current notification
         notify.cancel();
 
+        //add a msg for failed styles
+        let numOfFailedStyles = Object.keys(failedStyles).length;
+        console.log('failed style stuff:', failedStyles, numOfFailedStyles);
+
+        let failedMsg;
+        if(numOfFailedStyles > 0) {
+            let word = numOfFailedStyles > 1 ? ' styles':' style';
+            failedMsg = numOfFailedStyles + word + ' failed to import, see console for details.'
+        }
+
         //Msg to user
         if (actualCount > 0) {
-            figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers');
+            if (numOfFailedStyles === 0) {
+                figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers');
+            } else {
+                figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers. ' + failedMsg, {timeout: 5000});
+            }
         } else {
             figma.notify('No styles from your themes were found.');
         }
@@ -97,10 +118,12 @@ async function applyStyleToNode(node: SceneNode) {
             let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
 
             if (matchedStyle !== null) {
-                let styleId = styles[matchedStyle.key] || (await figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                styles[matchedStyle.key] = styleId;
-                node.fillStyleId = styleId;
-                count[node.id] = 1;
+                let styleId = await findMatchedKeyOrImportStyle(matchedStyle);
+                if (styleId) {
+                    styles[matchedStyle.key] = styleId;
+                    node.fillStyleId = styleId;
+                    count[node.id] = 1;
+                }
             }
 
             //for text nodes that have mixed color styles, match and apply paint style
@@ -117,11 +140,12 @@ async function applyStyleToNode(node: SceneNode) {
                 //apply style if there is a match in selected theme
                 let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
                 if (matchedStyle !== null) {
-                    let styleId = styles[matchedStyle.key] || (await figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                    styles[matchedStyle.key] = styleId;
-                    node.setRangeFillStyleId(fillStyle.start, fillStyle.end, styleId);
-                    count[node.id] = 1;
-                    
+                    let styleId = await findMatchedKeyOrImportStyle(matchedStyle);
+                    if (styleId) {
+                        styles[matchedStyle.key] = styleId;
+                        node.setRangeFillStyleId(fillStyle.start, fillStyle.end, styleId);
+                        count[node.id] = 1;
+                    }
                 }
 
             }
@@ -136,10 +160,12 @@ async function applyStyleToNode(node: SceneNode) {
         //see if there is a matching style in the selected theme, apply it if there is
         let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
         if (matchedStyle !== null) {
-            let styleId = styles[matchedStyle.key] || (await figma.importStyleByKeyAsync(matchedStyle.key)).id;
-            styles[matchedStyle.key] = styleId;
-            node.strokeStyleId = styleId;
-            count[node.id] = 1;
+            let styleId = await findMatchedKeyOrImportStyle(matchedStyle);
+            if (styleId) {
+                styles[matchedStyle.key] = styleId;
+                node.strokeStyleId = styleId;
+                count[node.id] = 1;
+            }
         }
     }
 
@@ -156,18 +182,20 @@ async function applyStyleToNode(node: SceneNode) {
             //see if there is a matching style in the selected theme
             let matchedStyle = returnMatchingStyle(originalStyle.name, 'TEXT');
             if (matchedStyle !== null) {
-                let styleId = styles[matchedStyle.key] || (await figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                styles[matchedStyle.key] = styleId;
-                let style = figma.getStyleById(styleId) as TextStyle;
-                
-                //load the fonts for the new style
-                await figma.loadFontAsync({
-                    'family': style.fontName.family,
-                    'style': style.fontName.style
-                });
+                let styleId = await findMatchedKeyOrImportStyle(matchedStyle);
+                if (styleId) {
+                    styles[matchedStyle.key] = styleId;
+                    let style = figma.getStyleById(styleId) as TextStyle;
+                    
+                    //load the fonts for the new style
+                    await figma.loadFontAsync({
+                        'family': style.fontName.family,
+                        'style': style.fontName.style
+                    });
 
-                node.textStyleId = styleId;
-                count[node.id] = 1;
+                    node.textStyleId = styleId;
+                    count[node.id] = 1;
+                }
 
             }
 
@@ -183,19 +211,21 @@ async function applyStyleToNode(node: SceneNode) {
                 let matchedStyle = returnMatchingStyle(originalStyle.name, 'TEXT') as TextStyle;
                 if (matchedStyle !== null) {
 
-                    let styleId = styles[matchedStyle.key] || (await figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                    styles[matchedStyle.key] = styleId;
-                    let style = figma.getStyleById(styleId) as TextStyle;
+                    let styleId = await findMatchedKeyOrImportStyle(matchedStyle);
+                    if (styleId) {
+                        styles[matchedStyle.key] = styleId;
+                        let style = figma.getStyleById(styleId) as TextStyle;
 
-                    //load the fonts for the new style
-                    await figma.loadFontAsync({
-                        'family': style.fontName.family,
-                        'style': style.fontName.style
-                    });
+                        //load the fonts for the new style
+                        await figma.loadFontAsync({
+                            'family': style.fontName.family,
+                            'style': style.fontName.style
+                        });
 
-                    //apply the style to the correct range
-                    node.setRangeTextStyleId(textStyle.start, textStyle.end, styleId);
-                    count[node.id] = 1;
+                        //apply the style to the correct range
+                        node.setRangeTextStyleId(textStyle.start, textStyle.end, styleId);
+                        count[node.id] = 1;
+                    }
                 }
             }
         }
@@ -211,10 +241,12 @@ async function applyStyleToNode(node: SceneNode) {
         let matchedStyle = returnMatchingStyle(originalStyle.name, 'EFFECT') as EffectStyle;
 
         if (matchedStyle !== null) {
-            let styleId = styles[matchedStyle.key] || (await figma.importStyleByKeyAsync(matchedStyle.key)).id;
-            styles[matchedStyle.key] = styleId;
-            node.effectStyleId = styleId;
-            count[node.id] = 1;
+            let styleId = await findMatchedKeyOrImportStyle(matchedStyle);
+                if (styleId) {
+                styles[matchedStyle.key] = styleId;
+                node.effectStyleId = styleId;
+                count[node.id] = 1;
+            }
         }
 
     }
@@ -288,4 +320,23 @@ function processStyleNameWithThemeNameIncluded(name, uniqueThemes) {
     console.log('new name final:' , newName ? newName : name)
 
     return newName ? newName : name;
+}
+
+async function findMatchedKeyOrImportStyle(matchedStyle) {
+
+    let result = null;
+
+    if (styles[matchedStyle.key]) {
+        result = styles[matchedStyle.key];
+    } else {
+        try{
+            result = (await figma.importStyleByKeyAsync(matchedStyle.key)).id;
+        } catch(err) {
+            let style = allThemes.find(style => style.key === matchedStyle.key);
+            console.log('Error importing style: ', style.name);
+            failedStyles[matchedStyle.key] = 1;
+        }
+    }
+
+    return result;
 }
