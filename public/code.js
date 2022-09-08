@@ -369,8 +369,11 @@ let count = {};
 const styles$1 = {};
 //notifications
 let notify;
+//failed styles
+let failedStyles = {};
 function applyTheme(themeData, theme) {
     return __awaiter(this, void 0, void 0, function* () {
+        failedStyles = {};
         //tell the user the theme is being applied
         notify = figma.notify('Applying ' + theme + ' theme...', { timeout: Infinity });
         //this is the theme the user selected to apply
@@ -378,6 +381,7 @@ function applyTheme(themeData, theme) {
         selectedTheme = theme.toLowerCase();
         //all of the theme data which includes the keys, provided from the JSONbin
         allThemes = themeData;
+        console.log('all themes: ', allThemes);
         //filter all of the theme data down to just the styles associated with the selected theme
         selectedThemeStyles = themeData.filter(style => style.theme.toLowerCase() === selectedTheme);
         //get for selection
@@ -405,9 +409,22 @@ function applyTheme(themeData, theme) {
             let actualCount = Object.keys(count).length;
             //cancel the current notification
             notify.cancel();
+            //add a msg for failed styles
+            let numOfFailedStyles = Object.keys(failedStyles).length;
+            console.log('failed style stuff:', failedStyles, numOfFailedStyles);
+            let failedMsg;
+            if (numOfFailedStyles > 0) {
+                let word = numOfFailedStyles > 1 ? ' styles' : ' style';
+                failedMsg = numOfFailedStyles + word + ' failed to import, see console for details.';
+            }
             //Msg to user
             if (actualCount > 0) {
-                figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers');
+                if (numOfFailedStyles === 0) {
+                    figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers');
+                }
+                else {
+                    figma.notify(selectedTheme + ' theme applied to ' + actualCount + ' layers. ' + failedMsg, { timeout: 5000 });
+                }
             }
             else {
                 figma.notify('No styles from your themes were found.');
@@ -435,11 +452,12 @@ function applyStyleToNode(node) {
                 //see if there is a matching style in the selected theme, apply it if there is
                 let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
                 if (matchedStyle !== null) {
-                    let styleId = styles$1[matchedStyle.key] || (yield figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                    styles$1[matchedStyle.key] = styleId;
-                    console.log('style id:', styleId);
-                    node.fillStyleId = styleId;
-                    count[node.id] = 1;
+                    let styleId = yield findMatchedKeyOrImportStyle(matchedStyle);
+                    if (styleId) {
+                        styles$1[matchedStyle.key] = styleId;
+                        node.fillStyleId = styleId;
+                        count[node.id] = 1;
+                    }
                 }
                 //for text nodes that have mixed color styles, match and apply paint style
             }
@@ -454,10 +472,12 @@ function applyStyleToNode(node) {
                         //apply style if there is a match in selected theme
                         let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
                         if (matchedStyle !== null) {
-                            let styleId = styles$1[matchedStyle.key] || (yield figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                            styles$1[matchedStyle.key] = styleId;
-                            node.setRangeFillStyleId(fillStyle.start, fillStyle.end, styleId);
-                            count[node.id] = 1;
+                            let styleId = yield findMatchedKeyOrImportStyle(matchedStyle);
+                            if (styleId) {
+                                styles$1[matchedStyle.key] = styleId;
+                                node.setRangeFillStyleId(fillStyle.start, fillStyle.end, styleId);
+                                count[node.id] = 1;
+                            }
                         }
                     }
                 }
@@ -477,10 +497,12 @@ function applyStyleToNode(node) {
             //see if there is a matching style in the selected theme, apply it if there is
             let matchedStyle = returnMatchingStyle(originalStyle.name, 'PAINT');
             if (matchedStyle !== null) {
-                let styleId = styles$1[matchedStyle.key] || (yield figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                styles$1[matchedStyle.key] = styleId;
-                node.strokeStyleId = styleId;
-                count[node.id] = 1;
+                let styleId = yield findMatchedKeyOrImportStyle(matchedStyle);
+                if (styleId) {
+                    styles$1[matchedStyle.key] = styleId;
+                    node.strokeStyleId = styleId;
+                    count[node.id] = 1;
+                }
             }
         }
         //TEXT STYLES
@@ -492,16 +514,18 @@ function applyStyleToNode(node) {
                 //see if there is a matching style in the selected theme
                 let matchedStyle = returnMatchingStyle(originalStyle.name, 'TEXT');
                 if (matchedStyle !== null) {
-                    let styleId = styles$1[matchedStyle.key] || (yield figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                    styles$1[matchedStyle.key] = styleId;
-                    let style = figma.getStyleById(styleId);
-                    //load the fonts for the new style
-                    yield figma.loadFontAsync({
-                        'family': style.fontName.family,
-                        'style': style.fontName.style
-                    });
-                    node.textStyleId = styleId;
-                    count[node.id] = 1;
+                    let styleId = yield findMatchedKeyOrImportStyle(matchedStyle);
+                    if (styleId) {
+                        styles$1[matchedStyle.key] = styleId;
+                        let style = figma.getStyleById(styleId);
+                        //load the fonts for the new style
+                        yield figma.loadFontAsync({
+                            'family': style.fontName.family,
+                            'style': style.fontName.style
+                        });
+                        node.textStyleId = styleId;
+                        count[node.id] = 1;
+                    }
                 }
                 //do this for text nodes that have multiple text styles
             }
@@ -514,17 +538,19 @@ function applyStyleToNode(node) {
                         let originalStyle = figma.getStyleById(textStyle.textStyleId);
                         let matchedStyle = returnMatchingStyle(originalStyle.name, 'TEXT');
                         if (matchedStyle !== null) {
-                            let styleId = styles$1[matchedStyle.key] || (yield figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                            styles$1[matchedStyle.key] = styleId;
-                            let style = figma.getStyleById(styleId);
-                            //load the fonts for the new style
-                            yield figma.loadFontAsync({
-                                'family': style.fontName.family,
-                                'style': style.fontName.style
-                            });
-                            //apply the style to the correct range
-                            node.setRangeTextStyleId(textStyle.start, textStyle.end, styleId);
-                            count[node.id] = 1;
+                            let styleId = yield findMatchedKeyOrImportStyle(matchedStyle);
+                            if (styleId) {
+                                styles$1[matchedStyle.key] = styleId;
+                                let style = figma.getStyleById(styleId);
+                                //load the fonts for the new style
+                                yield figma.loadFontAsync({
+                                    'family': style.fontName.family,
+                                    'style': style.fontName.style
+                                });
+                                //apply the style to the correct range
+                                node.setRangeTextStyleId(textStyle.start, textStyle.end, styleId);
+                                count[node.id] = 1;
+                            }
                         }
                     }
                 }
@@ -544,10 +570,12 @@ function applyStyleToNode(node) {
             //see if there is a matching style in the selected theme
             let matchedStyle = returnMatchingStyle(originalStyle.name, 'EFFECT');
             if (matchedStyle !== null) {
-                let styleId = styles$1[matchedStyle.key] || (yield figma.importStyleByKeyAsync(matchedStyle.key)).id;
-                styles$1[matchedStyle.key] = styleId;
-                node.effectStyleId = styleId;
-                count[node.id] = 1;
+                let styleId = yield findMatchedKeyOrImportStyle(matchedStyle);
+                if (styleId) {
+                    styles$1[matchedStyle.key] = styleId;
+                    node.effectStyleId = styleId;
+                    count[node.id] = 1;
+                }
             }
         }
         //repeat the process for all children
@@ -603,6 +631,25 @@ function processStyleNameWithThemeNameIncluded(name, uniqueThemes) {
     }
     console.log('new name final:', newName ? newName : name);
     return newName ? newName : name;
+}
+function findMatchedKeyOrImportStyle(matchedStyle) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let result = null;
+        if (styles$1[matchedStyle.key]) {
+            result = styles$1[matchedStyle.key];
+        }
+        else {
+            try {
+                result = (yield figma.importStyleByKeyAsync(matchedStyle.key)).id;
+            }
+            catch (err) {
+                let style = allThemes.find(style => style.key === matchedStyle.key);
+                console.log('Error importing style: ', style.name);
+                failedStyles[matchedStyle.key] = 1;
+            }
+        }
+        return result;
+    });
 }
 
 //api credentials
