@@ -174,6 +174,7 @@ const hasStrokeStyle = (node) => Boolean(node['strokeStyleId']);
 let styles = [];
 function getStylesFromNodes(nodes, styleTypes) {
     return __awaiter(this, void 0, void 0, function* () {
+        styles = [];
         if (nodes.length != 0) {
             //this will loop over all nodes passed to the function
             //it will past each node to a function to extract any styles
@@ -349,6 +350,7 @@ let textStyles = false;
 let effectStyles = false;
 //imported styles
 let allThemes = [];
+let selectedThemeStyles = [];
 let selectedTheme; //name of the theme we are applying
 //collect the number of nodes affected
 let count = {};
@@ -360,12 +362,17 @@ function applyTheme(themeData, theme) {
     return __awaiter(this, void 0, void 0, function* () {
         //tell the user the theme is being applied
         notify = figma.notify('Applying ' + theme + ' theme...', { timeout: Infinity });
+        //this is the theme the user selected to apply
+        //normalizing in lowercase for comparison reasons
         selectedTheme = theme.toLowerCase();
         //all of the theme data which includes the keys, provided from the JSONbin
         allThemes = themeData;
+        //filter all of the theme data down to just the styles associated with the selected theme
+        selectedThemeStyles = themeData.filter(style => style.theme.toLowerCase() === selectedTheme);
         //get for selection
         let selection = figma.currentPage.selection;
         //check for selection
+        //TODO: turn into guard 
         if (selection.length >= 1) {
             //identify which type of styles are present
             themeData.forEach(style => {
@@ -404,6 +411,7 @@ function applyTheme(themeData, theme) {
 function applyStyleToNode(node) {
     var e_1, _a, e_2, _b;
     return __awaiter(this, void 0, void 0, function* () {
+        //console.log('apply to node')
         //skip hidden nodes to improve performance
         if (!node.visible)
             return true;
@@ -537,18 +545,21 @@ function applyStyleToNode(node) {
 //HELPERS
 //find a matching style in the selected theme
 function returnMatchingStyle(name, type) {
-    //make an array of all of the unique theme names
+    //console.log('looking for matching style');
+    //make an array of all of the unique theme names, make sure they are all lower case
     let uniqueThemes = [...new Set(allThemes.map(item => item.theme.toLowerCase()))];
-    console.log('unique', uniqueThemes);
-    console.log('OG style name before:', name);
     //normalize style name for matching
-    let normalizedCurrentStyleName = processStyleNameWithThemeNameIncluded(name, uniqueThemes);
-    console.log('processed style name:', normalizedCurrentStyleName);
+    let normalizedCurrentStyleName = processStyleNameWithThemeNameIncluded(name.toLowerCase(), uniqueThemes);
+    //match will default to null unless we find one
     let match = null;
-    //iterate through all styles
-    allThemes.forEach(style => {
-        let normalizedNewStyleName = processStyleNameWithThemeNameIncluded(style.name, uniqueThemes);
-        if (normalizedNewStyleName === normalizedCurrentStyleName && style.type === type && style.theme === selectedTheme) {
+    //console.log('selected theme styles: ', selectedThemeStyles)
+    //iterate through all styles in all themes to find a match
+    selectedThemeStyles.forEach(style => {
+        let normalizedNewStyleName = processStyleNameWithThemeNameIncluded(style.name.toLowerCase(), uniqueThemes);
+        //console.log('current style name:', normalizedCurrentStyleName)
+        //console.log('new style name:', normalizedNewStyleName)
+        if (normalizedNewStyleName === normalizedCurrentStyleName && style.type === type) {
+            console.log('found a match!');
             match = style;
             return match;
         }
@@ -560,17 +571,25 @@ function returnMatchingStyle(name, type) {
 //if those conditions are met, strip the theme from the style name
 //if not, return the full name
 function processStyleNameWithThemeNameIncluded(name, uniqueThemes) {
+    //console.log('processing! name')
     let newName;
     let splitName = name.toLowerCase().split('/');
-    console.log('split name:', splitName);
+    //console.log('split name:', splitName);
+    // console.log('splitName[0]', splitName[0])
+    //console.log(uniqueThemes.length);
     if (splitName.length >= 2) {
-        uniqueThemes.forEach(theme => {
+        for (const theme of uniqueThemes) {
             if (splitName[0].includes(theme.toLowerCase())) {
+                //console.log('contains a theme name!');
                 splitName.shift();
+                //console.log('base name:', name)
+                //console.log('shifted name:', splitName)
                 newName = splitName.join('/').toString();
+                break;
             }
-        });
+        }
     }
+    console.log('new name final:', newName ? newName : name);
     return newName ? newName : name;
 }
 

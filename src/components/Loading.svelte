@@ -43,12 +43,6 @@
 		align-items: center;
     }
 
-    .hidden {
-        /* display: none; */
-		opacity: 0;
-		transition: opacity 200ms ease-in-out;
-    }
-
 
     .loading__animation {
 		width: 52px;

@@ -10,6 +10,8 @@ let styles:BaseStyle[] = [];
 
 export async function getStylesFromNodes(nodes:SceneNode[], styleTypes) {
 
+        styles = [];
+
         if (nodes.length != 0) {
 
             //this will loop over all nodes passed to the function
