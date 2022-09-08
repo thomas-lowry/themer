@@ -82,14 +82,14 @@
                 <DragList bind:itemsData={themes} itemComponent={ThemeRow} onDrop={onDrop}/>
             </div>
 
-            <div class="footer flex row justify-content-end align-items-center pr-xsmall pl-xsmall">
+            <div class="footer flex row flex-no-shrink justify-content-end align-items-center pr-xsmall pl-xsmall">
                 <Button on:click={() => applyTheme()} variant='primary' bind:disabled={themeIsSelected} class="flex-grow align-item justify-content-center">Apply to selection</Button>
             </div>
 
     {:else}
 
         <!-- Empty state -->
-        <div class="flex column flex-grow align-items-center justify-content-center"> 
+        <div class="flex column flex-no-shrink flex-grow align-items-center justify-content-center"> 
             {@html EmptyStateIllustation}
             <Button on:click={() => $createThemeUI = true} variant='secondary' class="mt-xsmall mb-small">Create a theme</Button>
         </div>

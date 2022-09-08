@@ -23,6 +23,9 @@ const styles = {};
 //notifications
 let notify;
 
+//failed styles
+let failedStyles = [];
+
 export async function applyTheme(themeData, theme) {
 
     //tell the user the theme is being applied
@@ -98,7 +101,9 @@ async function applyStyleToNode(node: SceneNode) {
 
             if (matchedStyle !== null) {
                 let styleId = styles[matchedStyle.key] || (await figma.importStyleByKeyAsync(matchedStyle.key)).id;
+
                 styles[matchedStyle.key] = styleId;
+                console.log('style id:', styleId);
                 node.fillStyleId = styleId;
                 count[node.id] = 1;
             }
